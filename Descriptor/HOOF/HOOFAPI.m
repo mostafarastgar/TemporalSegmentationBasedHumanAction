@@ -1,9 +1,7 @@
-stips = demo_selective_stip(0, video);
-tic;
-binSize = 32;
+function [ HOOFfeatures ] = HOOFAPI( video, stips, binSize, cubeSize )
 HOOFfeatures = zeros(size(stips, 1), binSize * 8);
 for(i=1:size(stips, 1))
-    cuboid = getCuboid(video, stips(i, :), 9);
+    cuboid = getCuboid(video, stips(i, :), cubeSize);
     [VX, VY] = OpticalFlow(cuboid, 30,1);
     sz = size(VX);
     hoof = zeros(binSize, sz(3));
@@ -12,4 +10,5 @@ for(i=1:size(stips, 1))
     end
     HOOFfeatures(i, :) = reshape(hoof, 1, binSize * sz(3));
 end
-toc;
+end
+

@@ -6,7 +6,7 @@
 function [corner_points] = demo_selective_stip(isDisplay, video)
 
 % Adding search paths
-addpath('../src/');
+% addpath('../src/');
 % Adding test video name
 test_vid_name = 'test_video.mat';
 

@@ -1,3 +1,10 @@
+addpath('STIPDetector/selective-stip/method 1/demo');
+addpath('STIPDetector/selective-stip/method 1/src');
+addpath('Descriptor/hog3d');
+addpath('Descriptor/HOOF');
+addpath('Utils');
+video = load('data/mat/jogging/person01_jogging_d1_uncomp1.avi.mat');
+video = video.video;
 tic;
 stips = demo_selective_stip(0, video);
 HOG3DFeatures = HOG3DAPI(video, stips, 8*162, 9);

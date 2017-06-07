@@ -46,7 +46,7 @@ for imCount = 1 : depth
     results{imCount} = [points(:,1) points(:, 2) t points(:, 3)];
 end
 
-disp('Temporal constraint starting...');
+% disp('Temporal constraint starting...');
 
 corner_points = temporalConstraint(image_stack, results, gP, temporalScale);
 

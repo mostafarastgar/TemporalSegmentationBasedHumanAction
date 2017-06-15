@@ -1,6 +1,4 @@
 tic;
-features = load('../data/features/NormalizedFeatures.mat');
-features = features.features;
 features(any(isnan(features), 2), :) = [];
 toc;
 

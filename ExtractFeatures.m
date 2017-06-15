@@ -1,9 +1,3 @@
-addpath('STIPDetector/selective-stip/method 1/demo');
-addpath('STIPDetector/selective-stip/method 1/src');
-addpath('Descriptor/hog3d');
-addpath('Descriptor/HOOF');
-addpath('Utils');
-
 features = zeros(2400000, 1554);
 index = 1;
 
@@ -114,5 +108,5 @@ for i=1 : size(file_names,2)
     display('walking');
     display(i);
 end
-
+features(index:end, :) = [];
 save('data/features/features.mat', 'features', '-v7.3');

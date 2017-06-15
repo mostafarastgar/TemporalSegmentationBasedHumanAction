@@ -1,5 +1,3 @@
-features = load('C:\Users\mostafa\Desktop\features\features.mat');
-features = features.features;
 disp('Start normalizing...');
 tic;
 minhog = min(min(features(:, 1:1296)));

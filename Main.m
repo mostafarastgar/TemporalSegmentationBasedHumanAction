@@ -6,5 +6,10 @@ addpath('Utils');
 
 % ExtractFeatures;
 
-% options = statset('Display','final');
-% obj = fitgmdist(features,2,'Options',options);
+% normalize;
+
+% kmeansfeatures;
+
+tic;
+GMModel = fitgmdist(features(:, 1:200), 4000,'SharedCov', true, 'CovType','diagonal', 'Options',statset('Display','iter','MaxIter',50));
+toc;

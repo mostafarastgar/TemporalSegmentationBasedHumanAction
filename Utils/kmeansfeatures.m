@@ -4,7 +4,7 @@ features(isnan(features)) = 0;
 toc;
 
 tic;
-[coeff,scores,latent] = pca(features(:, 1:end -2));
+[coeff,scores,latent] = princomp(features(:, 1:end -2));
 latent =100* (latent(1) - latent);
 for(pruneIndex=size(latent, 1):-1:2)
     if(floor(latent(pruneIndex)) ~= floor(latent(pruneIndex-1)))

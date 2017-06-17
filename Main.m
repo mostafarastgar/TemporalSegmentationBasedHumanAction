@@ -3,6 +3,7 @@ addpath('STIPDetector/selective-stip/method 1/src');
 addpath('Descriptor/hog3d');
 addpath('Descriptor/HOOF');
 addpath('Utils');
+addpath('BOW');
 
 % ExtractFeatures;
 
@@ -10,6 +11,8 @@ addpath('Utils');
 
 % kmeansfeatures;
 
-tic;
-GMModel = fitgmdist(features(:, 1:end-2), 4000,'SharedCov', true, 'CovType','diagonal', 'Options',statset('Display','iter','MaxIter',50));
-toc;
+% tic;
+% GMModel = fitgmdist(features(:, 1:end-2), 4000,'SharedCov', true, 'CovType','diagonal', 'Options',statset('Display','iter','MaxIter',50));
+% toc;
+
+videoVectors;

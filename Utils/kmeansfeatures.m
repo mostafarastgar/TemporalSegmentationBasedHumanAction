@@ -24,11 +24,9 @@ tic;
 features = [features IDX];
 for(i=1:4000)
     indices = find(features(:, end) == i);
-    if(size(indices, 1)>400)
-        dists = [D(indices, i) indices];
-        dists = sortrows(dists, 1);
-        features(dists(end - 400:end, 2),:) = [];
-        disp(num2str(i));
-    end
+    dists = [D(indices, i) indices];
+    dists = sortrows(dists, 1);
+    features(dists(end - round(4*end/5):end, 2),:) = [];
+    disp(num2str(i));
 end
 toc;

@@ -1,7 +1,7 @@
-features = zeros(2400000, 1554);
+features = zeros(2400000, 1555);
 index = 1;
 
-dir_perfix = 'C:\mostafa\Image Project\mat\boxing\';
+dir_perfix = 'data/mat/boxing/';
 videos=dir(strcat(dir_perfix,'*.mat'));
 file_names = {videos.name};
 for i=1 : size(file_names,2)
@@ -13,13 +13,13 @@ for i=1 : size(file_names,2)
     HOOFFeatures = HOOFAPI(video, stips, 32, 9);
     classLabel = zeros(size(stips, 1), 1) + 1;
     fileId = zeros(size(stips, 1), 1) + i;
-    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId];
+    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId stips(:, 3)];
     index = index + size(stips, 1);
-    display('jogging');
+    display('boxing');
     display(i);
 end
 
-dir_perfix = 'C:\mostafa\Image Project\mat\handwaving\';
+dir_perfix = 'data/mat/handclapping/';
 videos=dir(strcat(dir_perfix,'*.mat'));
 file_names = {videos.name};
 for i=1 : size(file_names,2)
@@ -31,13 +31,13 @@ for i=1 : size(file_names,2)
     HOOFFeatures = HOOFAPI(video, stips, 32, 9);
     classLabel = zeros(size(stips, 1), 1) + 2;
     fileId = zeros(size(stips, 1), 1) + i;
-    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId];
+    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId stips(:, 3)];
     index = index + size(stips, 1);
-    display('jogging');
+    display('handclapping');
     display(i);
 end
 
-dir_perfix = 'C:\mostafa\Image Project\mat\handclapping\';
+dir_perfix = 'data/mat/handwaving/';
 videos=dir(strcat(dir_perfix,'*.mat'));
 file_names = {videos.name};
 for i=1 : size(file_names,2)
@@ -49,13 +49,13 @@ for i=1 : size(file_names,2)
     HOOFFeatures = HOOFAPI(video, stips, 32, 9);
     classLabel = zeros(size(stips, 1), 1) + 3;
     fileId = zeros(size(stips, 1), 1) + i;
-    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId];
+    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId stips(:, 3)];
     index = index + size(stips, 1);
-    display('jogging');
+    display('handwaving');
     display(i);
 end
 
-dir_perfix = 'C:\mostafa\Image Project\mat\jogging\';
+dir_perfix = 'data/mat/jogging/';
 videos=dir(strcat(dir_perfix,'*.mat'));
 file_names = {videos.name};
 for i=1 : size(file_names,2)
@@ -67,13 +67,13 @@ for i=1 : size(file_names,2)
     HOOFFeatures = HOOFAPI(video, stips, 32, 9);
     classLabel = zeros(size(stips, 1), 1) + 4;
     fileId = zeros(size(stips, 1), 1) + i;
-    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId];
+    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId stips(:, 3)];
     index = index + size(stips, 1);
     display('jogging');
     display(i);
 end
 
-dir_perfix = 'C:\mostafa\Image Project\mat\running\';
+dir_perfix = 'data/mat/running/';
 videos=dir(strcat(dir_perfix,'*.mat'));
 file_names = {videos.name};
 for i=1 : size(file_names,2)
@@ -85,13 +85,13 @@ for i=1 : size(file_names,2)
     HOOFFeatures = HOOFAPI(video, stips, 32, 9);
     classLabel = zeros(size(stips, 1), 1) + 5;
     fileId = zeros(size(stips, 1), 1) + i;
-    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId];
+    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId stips(:, 3)];
     index = index + size(stips, 1);
     display('running');
     display(i);
 end
 
-dir_perfix = 'C:\mostafa\Image Project\mat\walking\';
+dir_perfix = 'data/mat/walking/';
 videos=dir(strcat(dir_perfix,'*.mat'));
 file_names = {videos.name};
 for i=1 : size(file_names,2)
@@ -103,7 +103,7 @@ for i=1 : size(file_names,2)
     HOOFFeatures = HOOFAPI(video, stips, 32, 9);
     classLabel = zeros(size(stips, 1), 1) + 6;
     fileId = zeros(size(stips, 1), 1) + i;
-    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId];
+    features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId stips(:, 3)];
     index = index + size(stips, 1);
     display('walking');
     display(i);

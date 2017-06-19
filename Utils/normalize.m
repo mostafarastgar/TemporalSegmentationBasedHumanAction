@@ -9,3 +9,4 @@ minhoof = min(min(features(:, 1297:1552)));
 maxhoof = max(max(features(:, 1297:1552)));
 features(:, 1297:1552) = (features(:, 1297:1552)-minhoof)/(maxhoof - minhoof);
 toc;
+save('data/features/normalizedFeatures.mat', 'features', '-v7.3');

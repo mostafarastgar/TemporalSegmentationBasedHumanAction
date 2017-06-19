@@ -1,4 +1,5 @@
-function [ videoVectors, prior, transmat, obsmat, LL, loglik ] = trainHMM( features, classNo, codeBook, coeff)
+% features = pcafeatures.mat
+function [ videoVectors, prior, transmat, obsmat, LL, loglik ] = trainHMM( features, classNo, codeBook)
 videoVectors = [];
 for(i=1:400)
     subData = features(features(:, end -1) == i);
@@ -13,8 +14,7 @@ for(i=1:400)
             maxFrame = maxFramesNo;
         end
         cube = subData(any(subData(:, end)>=minFrame, 2) & any(subData(:, end)<=maxFrame, 2), :);
-        cube = cube(:, 1:end-3) * coeff;
-        cube = transpose(cube(:, 1:46));
+        cube = transpose(cube(:, 1:end-3));
         dists = transpose(dist(codeBook, cube));
         [~, codeWords] = min(dists, [], 2);
         vector = zeros(1, 4000);

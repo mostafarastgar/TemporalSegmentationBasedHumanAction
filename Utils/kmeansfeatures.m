@@ -23,6 +23,8 @@ toc;
 
 tic;
 features = [features IDX];
+save('data/features/pcakmeansfeatures.mat', 'features', '-v7.3');
+save('data/features/pcakmeansparams.mat', 'C', 'coeff', 'IDX', 'latent', 'opts', 'sumd', '-v7.3');
 for(i=1:4000)
     indices = find(features(:, end) == i);
     dists = [D(indices, i) indices];
@@ -31,5 +33,4 @@ for(i=1:4000)
     disp(num2str(i));
 end
 save('data/features/prunedfeatures.mat', 'features', '-v7.3');
-save('data/features/pcakmeansparams.mat', 'C', 'coeff', 'IDX', 'latent', 'opts', 'sumd', '-v7.3');
 toc;

@@ -2,7 +2,7 @@ function [ data ] = features2BOW( features, classNO, BOWBins, displayIters )
 data = [];
 for(i=1:classNO)
     fileIndex = 1;
-    subData = features(any(features(:, end - 2)==i, 2) & any(features(:, end -1)==fileIndex, 2), :);
+    subData = features(any(features(:, end - 3)==i, 2) & any(features(:, end -2)==fileIndex, 2), :);
     while(size(subData, 1)>0)
         data = [data; zeros(1, BOWBins) i fileIndex];
         for(bin=1:BOWBins)
@@ -12,7 +12,7 @@ for(i=1:classNO)
             disp(strcat(['class:', num2str(i), ' file:', num2str(fileIndex)]));
         end
         fileIndex = fileIndex + 1;
-        subData = features(any(features(:, end - 2)==i, 2) & any(features(:, end -1)==fileIndex, 2), :);
+        subData = features(any(features(:, end - 3)==i, 2) & any(features(:, end -2)==fileIndex, 2), :);
     end
 end
 end

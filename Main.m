@@ -14,7 +14,7 @@ addpath('HMM/train');
 % kmeansfeatures;
 
 % tic;
-% GMModel = fitgmdist(features(:, 1:end-2), 4000,'SharedCov', true, 'CovType','diagonal', 'Options',statset('Display','iter','MaxIter',50));
+% GMModel = fitgmdist(features(:, 1:end-4), 4000,'SharedCov', true, 'CovType','diagonal', 'Options',statset('Display','iter','MaxIter',50));
 % save('data/features/GMModel.mat', 'GMModel', '-v7.3');
 % toc;
 

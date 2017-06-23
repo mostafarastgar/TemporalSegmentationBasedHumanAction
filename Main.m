@@ -18,4 +18,4 @@ addpath('HMM/train');
 % save('data/features/GMModel.mat', 'GMModel', '-v7.3');
 % toc;
 
-% videoVectors;
+videoVectors;

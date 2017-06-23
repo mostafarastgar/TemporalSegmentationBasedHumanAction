@@ -1,49 +1,75 @@
 % features = pcakmeansfeatures.mat
-function [ videoVectors, sequences, prior, transmat, obsmat, LL, loglik ] = trainHMMGMM( features, classNo, GMModel, coeff2, pruneIndex2)
-videoVectors = [];
+function [ sequences, prior, transmat1, obsmat ] = trainHMMGMM(windows, maxClassNo, beginStateWindows, endStateWindows)
+Q = 18;
+prior = [1/6;0;0;1/6;0;0;1/6;0;0;1/6;0;0;1/6;0;0;1/6;0;0];
+obsmat = zeros(18, size(windows, 1));
 maxVecotorsPerFile = 0;
-for(i=1:400)
-    subData = features(features(:, end -2) == i, :);
-    if(size(subData, 1)==0)
-        break;
-    end
-    maxFramesNo = max(subData(:, end -1));
-    for(j=1:ceil(maxFramesNo/10))
-        minFrame=(j-1)*10 + 1;
-        maxFrame=j*10;
-        if(maxFrame>maxFramesNo)
-            maxFrame = maxFramesNo;
+fileSize = 0;
+for(i=1:3:16)
+    classNo = floor(i/3) + 1;
+    beginningIndices = [];
+    middleIndices = [];
+    endIndices = [];
+    for(j=1:400)
+        indices = find(any(windows(:, end -3)==classNo, 2) & any(windows(:, end -2)==j, 2));
+        if(size(indices, 1)>0)
+            if(size(indices, 1)>=beginStateWindows+endStateWindows+1)
+                beginningIndices = [beginningIndices;indices(1:beginStateWindows)];
+                middleIndices = [middleIndices;indices(beginStateWindows+1:end-endStateWindows)];
+                endIndices = [endIndices;indices(end-endStateWindows+1:end)];
+            else
+                beginningIndices = [beginningIndices;indices(1)];
+                middleIndices = [middleIndices;indices(2:end-1)];
+                endIndices = [endIndices;indices(end)];
+            end
+            if(size(indices, 1)>maxVecotorsPerFile)
+                maxVecotorsPerFile = size(indices, 1);
+            end
+            fileSize = fileSize + 1;
+        else
+            break;
         end
-        cube = subData(any(subData(:, end -1)>=minFrame, 2) & any(subData(:, end -1)<=maxFrame, 2), :);
-        p = posterior(GMModel, cube(:, 1:end-4));
-        vector = sum(p, 1);
-        videoVectors = [videoVectors; vector classNo i minFrame maxFrame];
     end
-    if(j>maxVecotorsPerFile)
-        maxVecotorsPerFile = j;
-    end
-    if(mod(i, 10) == 0)
-        disp(num2str(i));
-    end
+    obsmat(i, beginningIndices) = (1/size(beginningIndices, 1));
+    obsmat(i+1, middleIndices) = (1/size(middleIndices, 1));
+    obsmat(i+2, endIndices) = (1/size(endIndices, 1));
 end
-labels = videoVectors(:, end-3:end);
-videoVectors = [videoVectors(:, 1:end -4) * coeff2];
-videoVectors = [videoVectors(:, 1:pruneIndex2) labels];
-fileSize = i;
-Q = 3;
-prior = [1;0;0];
-transmat = [0.5 0.5 0; 0 0.5 0.5; 0 0 1];
-obsmat = mk_stochastic(rand(Q,size(videoVectors, 1)));
-sequences = zeros(i, maxVecotorsPerFile);
+
+sequences = zeros(fileSize, maxVecotorsPerFile);
+transmat = [0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;...
+    0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;...
+    0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0;...
+    0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0;...
+    0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0;...
+    0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0;...
+    0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0;...
+    0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0;...
+    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0;...
+    0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0;...
+    0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0;...
+    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0;...
+    0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0;...
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0;...
+    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0;...
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0;...
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000;...
+    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000];
 lastIndex = 1;
-for(i=1:fileSize)
-    NoVectors = sum(videoVectors(:, end-2) == i);
-    sequences(i, 1:NoVectors) = [lastIndex:lastIndex+NoVectors-1];
-    if(NoVectors<maxVecotorsPerFile)
-        sequences(i, NoVectors+1:end) = lastIndex+NoVectors-1;
+sequenceIndex = 1;
+for(classNo=1:maxClassNo)
+    for(i=1:400)
+        NoVectors = sum(any(windows(:, end -3)==classNo, 2) & any(windows(:, end -2)==i, 2));
+        if(NoVectors == 0)
+            break;
+        end
+        sequences(sequenceIndex, 1:NoVectors) = [lastIndex:lastIndex+NoVectors-1];
+        if(NoVectors<maxVecotorsPerFile)
+            sequences(sequenceIndex, NoVectors+1:end) = lastIndex+NoVectors-1;
+        end
+        lastIndex = lastIndex+NoVectors;
+        sequenceIndex = sequenceIndex + 1;
     end
-    lastIndex = lastIndex+NoVectors;
 end
-[LL, prior, transmat, obsmat] = dhmm_em(sequences, prior, transmat, obsmat);
-loglik = dhmm_logprob(sequences, prior, transmat, obsmat)
+[~, prior, transmat1] = dhmm_em(sequences, prior, transmat, obsmat, 'max_iter', 10);
+transmat1([3, 6, 9, 12, 15, 18], :) = transmat([3, 6, 9, 12, 15, 18], :);
 end

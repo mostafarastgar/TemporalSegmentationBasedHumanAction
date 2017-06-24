@@ -1,8 +1,8 @@
 % features = pcakmeansfeatures.mat
-function [ sequences, prior, transmat1, obsmat ] = trainHMMGMM(windows, maxClassNo, beginStateWindows, endStateWindows)
+function [ sequences, prior, transmat1, obsmat ] = trainHMM(trainSequences, O, maxClassNo, beginStateWindows, endStateWindows)
 Q = 18;
 prior = [1/6;0;0;1/6;0;0;1/6;0;0;1/6;0;0;1/6;0;0;1/6;0;0];
-obsmat = zeros(18, size(windows, 1));
+obsmat = zeros(18, O);
 maxVecotorsPerFile = 0;
 fileSize = 0;
 for(i=1:3:16)
@@ -11,7 +11,7 @@ for(i=1:3:16)
     middleIndices = [];
     endIndices = [];
     for(j=1:400)
-        indices = find(any(windows(:, end -3)==classNo, 2) & any(windows(:, end -2)==j, 2));
+        indices = find(any(trainSequences(:, 1)==classNo, 2) & any(trainSequences(:, 2)==j, 2));
         if(size(indices, 1)>0)
             if(size(indices, 1)>=beginStateWindows+endStateWindows+1)
                 beginningIndices = [beginningIndices;indices(1:beginStateWindows)];
@@ -54,19 +54,18 @@ transmat = [0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0;...
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000;...
     0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000];
-lastIndex = 1;
 sequenceIndex = 1;
 for(classNo=1:maxClassNo)
     for(i=1:400)
-        NoVectors = sum(any(windows(:, end -3)==classNo, 2) & any(windows(:, end -2)==i, 2));
-        if(NoVectors == 0)
+        sequence = trainSequences(any(trainSequences(:, 1)==classNo, 2) & any(trainSequences(:, 2)==i, 2));
+        noOfObservations = size(sequence, 1);
+        if(noOfObservations == 0)
             break;
         end
-        sequences(sequenceIndex, 1:NoVectors) = [lastIndex:lastIndex+NoVectors-1];
-        if(NoVectors<maxVecotorsPerFile)
-            sequences(sequenceIndex, NoVectors+1:end) = lastIndex+NoVectors-1;
+        sequences(sequenceIndex, 1:noOfObservations) = transpose(sequence(:, 5));
+        if(noOfObservations<maxVecotorsPerFile)
+            sequences(sequenceIndex, noOfObservations+1:end) = sequence(end, 5);
         end
-        lastIndex = lastIndex+NoVectors;
         sequenceIndex = sequenceIndex + 1;
     end
 end

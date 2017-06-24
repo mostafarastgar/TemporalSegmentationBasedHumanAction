@@ -42,7 +42,8 @@ while(1)
             newClass = floor((indice-1)/3)+1;
             lastClass = floor((lastQ-1)/3)+1;
             if(newClass ~= lastClass)
-                segments = [segments; lastClass input(1, end -1) - 1];
+                segments = [segments; lastClass input(1, end -1) - 1 - floor(shiftWindow/2)];
+                shiftWindow = -1 * floor(shiftWindow/2);
             end
             lastQ = indice;
             Qs = [Qs lastQ];
@@ -53,6 +54,7 @@ while(1)
         break;
     end
     beginFrameNo = beginFrameNo + shiftWindow;
+    shiftWindow = windowSize;
 end
 segments = [segments; lastClass input(1, end)];
 

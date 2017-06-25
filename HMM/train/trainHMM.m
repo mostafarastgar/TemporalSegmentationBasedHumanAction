@@ -84,7 +84,7 @@ for(classNo=1:maxClassNo)
         end
     end
 end
-[ESTTR,ESTEMIT] = hmmtrain(sequences, transmat, emmisionMat);
+[ESTTR,ESTEMIT] = hmmtrain(sequences, transmat, emmisionMat, 'Maxiterations',10);
 ESTTR([1 4, 7, 10, 13, 16, 19], :) = transmat([1 4, 7, 10, 13, 16, 19], :);
 ESTTR(:, 1) = transmat(:, 1);
 end

@@ -10,7 +10,7 @@ for(i=1:size(classes_files))
     subData(:, end-1) = subData(:, end-1)-minFramesNo + lastFrameSize;
     sequence = [sequence; subData];
     lastFrameSize = lastFrameSize + maxFramesNo - minFramesNo + 1;
-    segments = [segments; lastFrameSize - 1 classes_files(i, 1)];
+    segments = [segments; size(sequence, 1) classes_files(i, 1)];
     if(mod(i, 10) == 0)
         disp(num2str(i));
     end

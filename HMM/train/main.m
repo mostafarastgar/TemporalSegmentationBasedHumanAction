@@ -35,6 +35,6 @@
 % display('sequences has been created');
 
 
-[ sequences, ESTTR,ESTEMIT ] = trainHMM(trainSequences, size(OCs, 1), 6, 40, 40, 17);
+[ sequences, ESTTR,ESTEMIT ] = trainHMM(trainSequences, size(OCs, 1), 6, 40, 40, 25);
 save('../data/HMMData.mat', 'sequences', 'ESTTR', 'ESTEMIT', '-v7.3');
 display('HMM has been trained');

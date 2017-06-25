@@ -1,6 +1,6 @@
 tic
 % videoFeatures = features2BOW(features, 6, 4000, 1);
-videoFeatures = features2BOW(features, 6, GMModel, 4000, 1);
+videoFeatures = features2Fisher(features, 6, GMModel, 4000, 1);
 [coeff2,scores2,latent2] = princomp(videoFeatures(:, 1:end -2));
 for(pruneIndex2=size(latent2, 1):-1:2)
     if(latent2(pruneIndex2) ~= 0)

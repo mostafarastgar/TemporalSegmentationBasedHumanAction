@@ -4,7 +4,8 @@ GMModel = load('../../data/features/GMModel.mat');
 GMModel = GMModel.GMModel;
 pca2ParamsGMM = load('../../data/features/pca2ParamsGMM.mat');
 coeff2 = pca2ParamsGMM.coeff2;
-pruneIndex2 = pca2ParamsGMM.pruneIndex2;
+% pruneIndex2 = pca2ParamsGMM.pruneIndex2;
+pruneIndex2 = 100;
 
 windows = break2Windows(features, 6, 1, GMModel, coeff2, pruneIndex2);
 testWindowsIndices = [];
@@ -25,9 +26,10 @@ save('../data/windows.mat', 'testWindows', 'trainWindows', '-v7.3');
 display('windows has been created');
 
 windows = [trainWindows; testWindows];
-opts = statset('MaxIter',20, 'Display', 'iter');
-[IDX,OCs] = kmeans(windows(:, 1:end -4),round(size(windows, 1)*0.1),'Options',opts);
+opts = statset('MaxIter',10, 'Display', 'iter');
+[~,OCs] = kmeans(windows(:, 1:end -4),round(size(windows, 1)*0.01),'Options',opts);
 save('../data/OCs.mat', 'OCs', '-v7.3');
+IDX = knnsearch(OCs, trainWindows(:, 1:end -4))
 trainSequences = [trainWindows(:, end-3:end) IDX];
 save('../data/trainSequences.mat', 'trainSequences', '-v7.3');
 display('sequences has been created');

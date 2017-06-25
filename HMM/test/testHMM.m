@@ -1,21 +1,13 @@
-function [ loglik, Qs, segments ] = testHMM( input, prior, obsmat, transmat )
-logliks = prior .* obsmat(:, input(1, 5));
-loglik = max(logliks);
-lastQ = find(logliks == logliks);
-Qs = [lastQ];
+function [ PSTATES, segments, logpseq ] = testHMM( testSequence, ESTTR, ESTEMIT )
+[PSTATES,logpseq] = hmmdecode(testSequence, ESTTR, ESTEMIT);
 segments = [];
-for(i=2:size(input, 1))
-    [C, indice] = max(transmat(lastQ, :) .* transpose(obsmat(:, input(i, 5))));
-    loglik = loglik + C;
-    
-    newClass = floor((indice-1)/3)+1;
-    lastClass = floor((lastQ-1)/3)+1;
-    if(newClass ~= lastClass)
-        segments = [segments; lastClass input(i, end-2) - 1];
+lastClassNo = ceil((PSTATES(2)-1)/3);
+for(i=3:size(PSTATES, 1))
+    newClassNo = ceil((PSTATES(i)-1)/3);
+    if(lastClassNo ~= newClassNo)
+        segments(end+1) = [lastClassNo i - 1];
+        lastClassNo = newClassNo;
     end
-    
-    lastQ = indice;
-    Qs = [Qs lastQ];
 end
-segments = [segments; lastClass input(i, end-1)];
+segments(end+1) = [newClassNo i];
 

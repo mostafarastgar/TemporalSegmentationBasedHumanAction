@@ -1,9 +1,10 @@
 % features = pcakmeansfeatures.mat
 function [ sequences, ESTTR,ESTEMIT ] = trainHMM(trainSequences, O, maxClassNo, beginStateWindows, endStateWindows, randomSizePerClass)
 Q = 18;
-emmisionMat = zeros(19, O);
+ESTEMIT = zeros(19, O);
 maxVecotorsPerFile = 0;
 fileSize = 0;
+finalBeginningIndices = [];
 for(i=2:3:17)
     classNo = ceil((i-1)/3);
     beginningIndices = [];
@@ -28,23 +29,29 @@ for(i=2:3:17)
             fileSize = fileSize + 1;
         end
     end
+    finalBeginningIndices = [finalBeginningIndices; beginningIndices];
     uniqueValues = unique(beginningIndices(:));
     numberOfElement = numel(uniqueValues);
     for(j=1:numberOfElement)
-        emmisionMat(i, uniqueValues(j)) = sum(beginningIndices(:) == uniqueValues(j))/numberOfElement;
+        ESTEMIT(i, uniqueValues(j)) = sum(beginningIndices(:) == uniqueValues(j))/numberOfElement;
     end
     
     uniqueValues = unique(middleIndices(:));
     numberOfElement = numel(uniqueValues);
     for(j=1:numberOfElement)
-        emmisionMat(i+1, uniqueValues(j)) = sum(middleIndices(:) == uniqueValues(j))/numberOfElement;
+        ESTEMIT(i+1, uniqueValues(j)) = sum(middleIndices(:) == uniqueValues(j))/numberOfElement;
     end
     
     uniqueValues = unique(endIndices(:));
     numberOfElement = numel(uniqueValues);
     for(j=1:numberOfElement)
-        emmisionMat(i+2, uniqueValues(j)) = sum(endIndices(:) == uniqueValues(j))/numberOfElement;
+        ESTEMIT(i+2, uniqueValues(j)) = sum(endIndices(:) == uniqueValues(j))/numberOfElement;
     end
+end
+uniqueValues = unique(finalBeginningIndices(:));
+numberOfElement = numel(uniqueValues);
+for(j=1:numberOfElement)
+    ESTEMIT(1, uniqueValues(j)) = sum(finalBeginningIndices(:) == uniqueValues(j))/numberOfElement;
 end
 
 prior = [1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0];
@@ -102,6 +109,6 @@ for(i=1:size(sequences, 1))
     end
 end
 sequences = sequences(:, 1:maxColumn);
-[ESTTR,ESTEMIT] = hmmtrain(sequences, transmat, emmisionMat, 'Maxiterations',10);
+ESTTR = hmmtrain(sequences, transmat, ESTEMIT, 'Maxiterations',10);
 ESTTR([1 4, 7, 10, 13, 16, 19], :) = transmat([1 4, 7, 10, 13, 16, 19], :);
 end

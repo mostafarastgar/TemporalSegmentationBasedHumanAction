@@ -1,13 +1,13 @@
-function [ PSTATES, segments, logpseq ] = testHMM( testSequence, ESTTR, ESTEMIT )
-[PSTATES,logpseq] = hmmdecode(testSequence, ESTTR, ESTEMIT);
+function [ STATES, segments ] = testHMM( testSequence, ESTTR, ESTEMIT )
+STATES = hmmviterbi(testSequence,ESTTR,ESTEMIT);
 segments = [];
-lastClassNo = ceil((PSTATES(2)-1)/3);
-for(i=3:size(PSTATES, 1))
-    newClassNo = ceil((PSTATES(i)-1)/3);
+lastClassNo = ceil((STATES(2)-1)/3);
+for(i=3:size(STATES, 2))
+    newClassNo = ceil((STATES(i)-1)/3);
     if(lastClassNo ~= newClassNo)
-        segments(end+1) = [lastClassNo i - 1];
+        segments = [segments; i - 1 lastClassNo];
         lastClassNo = newClassNo;
     end
 end
-segments(end+1) = [newClassNo i];
+segments = [segments; i newClassNo];
 

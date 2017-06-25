@@ -4,7 +4,7 @@ lastFrameSize = 1;
 segments = [];
 for(i=1:size(classes_files))
     subData = testWindows(any(testWindows(:, end-3)==classes_files(i, 1), 2)...
-        & any(features(:, end-2)==classes_files(i, 2), 2), :);
+        & any(testWindows(:, end-2)==classes_files(i, 2), 2), :);
     minFramesNo = min(subData(:, end -1));
     maxFramesNo = max(subData(:, end -1));
     subData(:, end-1) = subData(:, end-1)-minFramesNo + lastFrameSize;

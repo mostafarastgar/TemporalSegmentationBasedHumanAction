@@ -11,4 +11,4 @@ testWindows = windows.testWindows;
 confuseItems = [1 1; 4 44; 5 85; 2 42];
 [testSequence, originalSegments] = getObservations(testWindows, confuseItems, OCs);
 
-[ PSTATES, segments, logpseq ] = testHMM(testSequence, ESTTR, ESTEMIT);
+[ STATES, segments ] = testHMM(transpose(testSequence(:, 5)), ESTTR, ESTEMIT);

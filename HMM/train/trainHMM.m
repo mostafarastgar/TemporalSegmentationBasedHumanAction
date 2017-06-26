@@ -1,7 +1,7 @@
 % features = pcakmeansfeatures.mat
-function [ sequences, ESTTR,ESTEMIT ] = trainHMM(trainSequences, O, maxClassNo, beginStateWindows, endStateWindows, randomSizePerClass)
-Q = 18;
-ESTEMIT = zeros(19, O);
+function [ sequences, ESTTR,ESTEMIT ] = trainHMM(trainSequences, O, maxClassNo, randomSizePerClass)
+Q = 19;
+ESTEMIT = zeros(Q, O);
 maxVecotorsPerFile = 0;
 fileSize = 0;
 finalBeginningIndices = [];
@@ -12,19 +12,14 @@ for(i=2:3:17)
     endIndices = [];
     for(j=1:400)
         indices = trainSequences(any(trainSequences(:, 1)==classNo, 2) & any(trainSequences(:, 2)==j, 2), 5);
-        if(size(indices, 1)>0)
-            if(size(indices, 1)>=beginStateWindows+endStateWindows+1)
-                beginningIndices = [beginningIndices;indices(1:beginStateWindows)];
-                middleIndices = [middleIndices;indices(beginStateWindows+1:end-endStateWindows)];
-                endIndices = [endIndices;indices(end-endStateWindows+1:end)];
-            else
-                miniSize = round(size(indices, 1)/4);
-                beginningIndices = [beginningIndices;indices(1:miniSize)];
-                middleIndices = [middleIndices;indices(miniSize+1:end-miniSize)];
-                endIndices = [endIndices;indices(end-miniSize+1:end)];
-            end
-            if(size(indices, 1)>maxVecotorsPerFile)
-                maxVecotorsPerFile = size(indices, 1);
+        sizeOfIndices = size(indices, 1);
+        if(sizeOfIndices>0)
+            miniSize = round(sizeOfIndices/4);
+            beginningIndices = [beginningIndices;indices(1:miniSize)];
+            middleIndices = [middleIndices;indices(miniSize+1:end-miniSize)];
+            endIndices = [endIndices;indices(end-miniSize+1:end)];
+            if(sizeOfIndices>maxVecotorsPerFile)
+                maxVecotorsPerFile = sizeOfIndices;
             end
             fileSize = fileSize + 1;
         end
@@ -74,7 +69,7 @@ transmat = [0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000;...
     0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000];
 transmat = [prior;transmat];
-transmat = [zeros(19, 1) transmat];
+transmat = [zeros(Q, 1) transmat];
 
 sequences = zeros(fileSize, maxVecotorsPerFile);
 sequenceIndex = 1;
@@ -110,5 +105,5 @@ for(i=1:size(sequences, 1))
 end
 sequences = sequences(:, 1:maxColumn);
 ESTTR = hmmtrain(sequences, transmat, ESTEMIT, 'Maxiterations',10);
-ESTTR([1 4, 7, 10, 13, 16, 19], :) = transmat([1 4, 7, 10, 13, 16, 19], :);
+ESTTR([1:3:Q], :) = transmat([1:3:Q], :);
 end

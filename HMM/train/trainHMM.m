@@ -1,7 +1,6 @@
 % features = pcakmeansfeatures.mat
-function [ sequences, ESTTR,ESTEMIT ] = trainHMM(trainSequences, O, maxClassNo)
-Q = 19;
-ESTEMIT = zeros(Q, O);
+function [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(trainSequences, O, Q, maxClassNo)
+emisionmat = zeros(Q, O);
 maxVecotorsPerFile = 0;
 fileSize = 0;
 finalBeginningIndices = [];
@@ -26,27 +25,27 @@ for(i=2:3:17)
     end
     finalBeginningIndices = [finalBeginningIndices; beginningIndices];
     uniqueValues = unique(beginningIndices(:));
-    numberOfElement = numel(uniqueValues);
-    for(j=1:numberOfElement)
-        ESTEMIT(i, uniqueValues(j)) = sum(beginningIndices(:) == uniqueValues(j))/numberOfElement;
+    numberOfElement = size(beginningIndices, 1);
+    for(j=1:size(uniqueValues, 1))
+        emisionmat(i, uniqueValues(j)) = sum(beginningIndices(:) == uniqueValues(j))/numberOfElement;
     end
     
     uniqueValues = unique(middleIndices(:));
-    numberOfElement = numel(uniqueValues);
-    for(j=1:numberOfElement)
-        ESTEMIT(i+1, uniqueValues(j)) = sum(middleIndices(:) == uniqueValues(j))/numberOfElement;
+    numberOfElement = size(middleIndices, 1);
+    for(j=1:size(uniqueValues, 1))
+        emisionmat(i+1, uniqueValues(j)) = sum(middleIndices(:) == uniqueValues(j))/numberOfElement;
     end
     
     uniqueValues = unique(endIndices(:));
-    numberOfElement = numel(uniqueValues);
-    for(j=1:numberOfElement)
-        ESTEMIT(i+2, uniqueValues(j)) = sum(endIndices(:) == uniqueValues(j))/numberOfElement;
+    numberOfElement = size(endIndices, 1);
+    for(j=1:size(uniqueValues, 1))
+        emisionmat(i+2, uniqueValues(j)) = sum(endIndices(:) == uniqueValues(j))/numberOfElement;
     end
 end
 uniqueValues = unique(finalBeginningIndices(:));
-numberOfElement = numel(uniqueValues);
-for(j=1:numberOfElement)
-    ESTEMIT(1, uniqueValues(j)) = sum(finalBeginningIndices(:) == uniqueValues(j))/numberOfElement;
+numberOfElement = size(finalBeginningIndices, 1);
+for(j=1:size(uniqueValues, 1))
+    emisionmat(1, uniqueValues(j)) = sum(finalBeginningIndices(:) == uniqueValues(j))/numberOfElement;
 end
 
 prior = [1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0];
@@ -71,22 +70,33 @@ transmat = [0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;
 transmat = [prior;transmat];
 transmat = [zeros(Q, 1) transmat];
 
-sequences = zeros(fileSize, maxVecotorsPerFile);
-sequenceIndex = 1;
+sequences = {};
+lastIndex = 1;
 for(classNo=1:maxClassNo)
     for(i=1:400)
         sequence = trainSequences(any(trainSequences(:, 1)==classNo, 2) & any(trainSequences(:, 2)==i, 2), :);
         noOfObservations = size(sequence, 1);
         if(noOfObservations > 0)
-            sequences(sequenceIndex, 1:noOfObservations) = transpose(sequence(:, 5));
-            if(noOfObservations<maxVecotorsPerFile)
-                sequences(sequenceIndex, noOfObservations+1:end) = sequence(end, 5);
-            end
-            sequenceIndex = sequenceIndex + 1;
+            sequences{lastIndex} = transpose(sequence(:, 5));
+            lastIndex = lastIndex + 1;
         end
     end
 end
-sequences(sequenceIndex:end, :) = [];
-ESTTR = hmmtrain(sequences, transmat, ESTEMIT, 'Maxiterations',10);
-ESTTR([1:3:Q], :) = transmat([1:3:Q], :);
+[ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 250);
+ESTTR(1, :) = transmat(1, :);
+ESTEMIT(1, :) = emisionmat(1, :);
+
+ESTTR(:, :) = ESTTR(:, :)*0.5;
+ESTTR = [ESTTR zeros(Q, 1)+0.5];
+ESTTR = [ESTTR;zeros(1, Q+1)];
+ESTTR(end, 2:end-1) = 0.5/(Q-1);
+ESTTR(end, end) = 0.5;
+transmat(:, :) = transmat(:, :)*0.5;
+transmat = [transmat ESTTR(1:end-1, end)];
+transmat = [transmat; ESTTR(end, :)];
+
+ESTEMIT = [ESTEMIT; zeros(1, O)];
+ESTEMIT(end, end-1) = 0.2;
+ESTEMIT(end, end) = 0.8;
+emisionmat = [emisionmat; ESTEMIT(end, :)];
 end

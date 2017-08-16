@@ -1,4 +1,4 @@
-function [ sequence, segments ] = getObservations( testWindows, classes_files, OCs )
+function [ sequence, segments ] = getObservations( testWindows, classes_files, OCs, fences )
 sequence = [];
 lastFrameSize = 1;
 segments = [];
@@ -16,6 +16,15 @@ for(i=1:size(classes_files))
     end
 end
 sequence(:, end) = sequence(:, end -1);
-IDX = knnsearch(OCs, sequence(:, 1:end-4));
+[IDX,D] = knnsearch(OCs, sequence(:, 1:end-4));
+for(i=1:size(IDX, 1))
+    if(D(i)>fences(IDX(i), 2))
+        IDX(i) = size(OCs, 1) + 2;
+    else
+        if(D(i)>fences(IDX(i), 1))
+            IDX(i) = size(OCs, 1) + 1;
+        end
+    end
+end
 sequence = [sequence(:, end-3:end) IDX];
 end

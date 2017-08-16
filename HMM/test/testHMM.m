@@ -1,13 +1,27 @@
 function [ STATES, segments ] = testHMM( testSequence, ESTTR, ESTEMIT )
 STATES = hmmviterbi(testSequence,ESTTR,ESTEMIT);
+initStates = [2:3:17];
+finalStates = initStates + 2;
 segments = [];
-lastClassNo = ceil((STATES(2)-1)/3);
-for(i=3:size(STATES, 2))
-    newClassNo = ceil((STATES(i)-1)/3);
-    if(lastClassNo ~= newClassNo)
-        segments = [segments; i - 1 lastClassNo];
-        lastClassNo = newClassNo;
+lastState = 0;
+segIndex = 1;
+for(i=2:size(STATES, 2))
+    if(sum(initStates(:) == STATES(i))>0)
+        if(sum(finalStates(:) == lastState)>0)
+            segments = [segments; i-1 segIndex];
+            segIndex = segIndex + 1;
+        end
+        lastState = STATES(i);
+    else
+        if(STATES(i) ~= STATES(i - 1))
+            if(STATES(i) == STATES(i - 1) + 1)
+                lastState=STATES(i);
+            else
+                lastState = 0;
+            end
+        end
     end
 end
-segments = [segments; i newClassNo];
-
+if(sum(finalStates(:) == lastState)>0)
+    segments = [segments; i segIndex];
+end

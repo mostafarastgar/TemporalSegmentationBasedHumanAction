@@ -9,7 +9,7 @@ end
 originalSegments = tmp;
 
 start = 1;
-tmp = [zeros(size(segments, 1), 1) segments(:, 1) zeros(size(segments, 1), 1) segments(:, end)];
+tmp = [segments(:, 1) segments(:, 2) zeros(size(segments, 1), 1) segments(:, end)];
 for(i=1:size(segments, 1))
     tmp(i, 1) = start;
     tmp(i, 3) = tmp(i, 2) - tmp(i, 1) + 1;

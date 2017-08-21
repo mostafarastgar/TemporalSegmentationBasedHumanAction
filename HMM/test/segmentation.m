@@ -1,13 +1,22 @@
 HMMData = load('../data/HMMData.mat');
-ESTTR = HMMData.ESTTR;
+ESTTR = HMMData.transmat;
 ESTEMIT = HMMData.emisionmat;
+
+GMModel = load('../../data/features/GMModel.mat');
+GMModel = GMModel.GMModel;
 
 OCs = load('../data/OCs.mat');
 fences = OCs.fences;
 OCs = OCs.OCs;
 
-windows = load('../data/windows.mat');
-testWindows = windows.testWindows;
+features = load('../../data/features/pcakmeansfeatures.mat');
+features = features.features;
+pca2ParamsGMM = load('../../data/features/pca2Params.mat');
+coeffGMM = pca2ParamsGMM.coeff2;
+pruneGMM = pca2ParamsGMM.pruneIndex2;
+
+windowSize = 10;
+tolerance = 5;
 tic;
 confuseItems = {
 %     [1 1; 4 44; 5 85; 2 42],
@@ -36,9 +45,9 @@ orgSegs = {};
 segs = {};
 accuracies = zeros(length(confuseItems), 1);
 for(i=1:length(confuseItems))
-    [testSequence, originalSegments] = getObservations(testWindows, confuseItems{i}, OCs, fences);
-    [ STATES, segments ] = testHMM(transpose(testSequence(:, 5)), ESTTR, ESTEMIT);
-    [originalSegments, segments, accuracy] = findAccuracy(originalSegments, segments);
+    [testSequence, originalSegments] = getObservations(features, confuseItems{i}, windowSize, GMModel, coeffGMM, pruneGMM, OCs, fences);
+    [ STATES, segments ] = testHMM(testSequence, ESTTR, ESTEMIT);
+    [originalSegments, segments, accuracy] = findAccuracy(originalSegments, segments, tolerance);
     orgSegs{i} = originalSegments;
     segs{i} = segments;
     accuracies(i) = accuracy;

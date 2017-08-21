@@ -1,5 +1,7 @@
 function [ STATES, segments ] = testHMM( testSequence, ESTTR, ESTEMIT )
-STATES = hmmviterbi(testSequence,ESTTR,ESTEMIT);
+observations = transpose(testSequence(:, end));
+STATES = hmmviterbi(observations,ESTTR,ESTEMIT);
+[PSTATES,logpseq] = hmmdecode(observations,ESTTR,ESTEMIT);
 initStates = [2:3:17];
 finalStates = initStates + 2;
 segments = [];
@@ -8,7 +10,7 @@ segIndex = 1;
 for(i=2:size(STATES, 2))
     if(sum(initStates(:) == STATES(i))>0)
         if(sum(finalStates(:) == lastState)>0)
-            segments = [segments; i-1 segIndex];
+            segments = [segments; testSequence(i-1, end-1) segIndex];
             segIndex = segIndex + 1;
         end
         lastState = STATES(i);
@@ -22,6 +24,6 @@ for(i=2:size(STATES, 2))
         end
     end
 end
-if(sum(finalStates(:) == lastState)>0)
-    segments = [segments; i segIndex];
+if(segments(end, 1) ~= testSequence(end, end -1))
+    segments = [segments; testSequence(end, end -1) segIndex];
 end

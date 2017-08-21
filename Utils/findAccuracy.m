@@ -1,6 +1,6 @@
-function [ originalSegments, segments, accuracy ] = findAccuracy( originalSegments, segments )
+function [ originalSegments, segments, accuracy ] = findAccuracy( originalSegments, segments, tolerance )
 start = 1;
-tmp = [zeros(size(originalSegments, 1), 1) originalSegments(:, 1) zeros(size(originalSegments, 1), 1) originalSegments(:, end)];
+tmp = [originalSegments(:, 1) originalSegments(:, 2) zeros(size(originalSegments, 1), 1) originalSegments(:, end)];
 for(i=1:size(originalSegments, 1))
     tmp(i, 1) = start;
     tmp(i, 3) = tmp(i, 2) - tmp(i, 1) + 1;
@@ -25,8 +25,17 @@ for(i=1:size(idx, 1))
     segment = segments(idx(i), :);
     index = findNearestSegment(segment, originalSegments);
     if(index > 0)
-        faults = faults + abs(originalSegments(index, 1) - segment(1));
-        faults = faults + abs(originalSegments(index, 2) - segment(2));
+        conflict = abs(originalSegments(index, 1) - segment(1));
+        if(conflict<=tolerance)
+            conflict = 0;
+        end
+        faults = faults + conflict;
+        
+        conflict = abs(originalSegments(index, 2) - segment(2));
+        if(conflict<=tolerance)
+            conflict = 0;
+        end
+        faults = faults + conflict;
         tmpOrg = [tmpOrg; originalSegments(index, :)];
         tmpOrg(end, 4) = slabel;
         tmpIn = [tmpIn; segments(idx(i), :)];
@@ -34,13 +43,21 @@ for(i=1:size(idx, 1))
         originalSegments(index, :) = [];
         slabel = slabel +1;
     else
-        faults = faults + segment(3);
+        conflict = segment(3);
+        if(conflict<=tolerance)
+            conflict = 0;
+        end
+        faults = faults + conflict;
         tmpIn = [tmpIn; segments(idx(i), :)];
         tmpIn(end, 4) = 0;
     end
 end
 if(size(originalSegments, 1) >0)
-    faults = faults + sum(originalSegments(:, 3));
+    conflict = sum(originalSegments(:, 3));
+    if(conflict<=tolerance)
+        conflict = 0;
+    end
+    faults = faults + conflict;
     for(i=1:size(originalSegments, 1) >0)
         tmpOrg = [tmpOrg; originalSegments(i, :)];
         tmpOrg(end, 4) = slabel;

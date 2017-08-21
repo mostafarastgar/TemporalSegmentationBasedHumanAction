@@ -1,30 +1,42 @@
-function [ sequence, segments ] = getObservations( testWindows, classes_files, OCs, fences )
+function [ sequence, segments ] = getObservations( features, classes_files, windowSize, GMModel, coeffGMM, pruneGMM, OCs, fences )
 sequence = [];
-lastFrameSize = 1;
-segments = [];
+lastFrameSize = 0;
+segments = zeros(size(classes_files,1), 3);
+sequence = [];
+idxs = [];
 for(i=1:size(classes_files))
-    subData = testWindows(any(testWindows(:, end-3)==classes_files(i, 1), 2)...
-        & any(testWindows(:, end-2)==classes_files(i, 2), 2), :);
+    idx = find(any(features(:, end-3)==classes_files(i, 1), 2)...
+        & any(features(:, end-2)==classes_files(i, 2), 2));
+    subData = features(idx, :);
     minFramesNo = min(subData(:, end -1));
     maxFramesNo = max(subData(:, end -1));
-    subData(:, end-1) = subData(:, end-1)-minFramesNo + lastFrameSize;
-    sequence = [sequence; subData];
-    lastFrameSize = lastFrameSize + maxFramesNo - minFramesNo + 1;
-    segments = [segments; size(sequence, 1) classes_files(i, 1)];
-    if(mod(i, 10) == 0)
-        disp(num2str(i));
-    end
+    segments(i, :) = [minFramesNo+lastFrameSize maxFramesNo+lastFrameSize classes_files(i, 1)];
+    features(idx, end -1)=features(idx, end -1)+lastFrameSize;
+    lastFrameSize = maxFramesNo+lastFrameSize;
+    idxs = [idxs; idx];
 end
-sequence(:, end) = sequence(:, end -1);
-[IDX,D] = knnsearch(OCs, sequence(:, 1:end-4));
-for(i=1:size(IDX, 1))
-    if(D(i)>fences(IDX(i), 2))
-        IDX(i) = size(OCs, 1) + 2;
-    else
-        if(D(i)>fences(IDX(i), 1))
-            IDX(i) = size(OCs, 1) + 1;
+subData = features(idxs, :);
+maxFramesNo = max(subData(:, end-1));
+for(j=1:ceil(lastFrameSize/windowSize))
+    minFrame=(j-1)*windowSize + 1;
+    maxFrame=j*windowSize;
+    if(maxFrame>maxFramesNo)
+        maxFrame = maxFramesNo;
+    end
+    cube = subData(any(subData(:, end -1)>=minFrame, 2) & any(subData(:, end -1)<=maxFrame, 2), 1:end-4);
+    p = posterior(GMModel, cube);
+    vector = sum(p, 1);
+    vector = vector*coeffGMM;
+    vector = vector(1, 1:pruneGMM);
+    if(sum(vector) ~= 0)
+        [IDX,D]=knnsearch(OCs, vector);
+        if(D>fences(IDX, 2))
+            IDX = size(OCs, 1) + 2;
+        else
+            if(D>fences(IDX, 1))
+                IDX = size(OCs, 1) + 1;
+            end
         end
+        sequence = [sequence; minFrame maxFrame IDX];
     end
-end
-sequence = [sequence(:, end-3:end) IDX];
 end

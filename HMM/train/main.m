@@ -25,14 +25,13 @@
 % display('windows has been created');
 % 
 % windows = [trainWindows; testWindows];
-opts = statset('Display', 'iter');
-% opts = statset('Display', 'iter', 'MaxIter', 25);
-[OIDXs,OCs,Osumds,ODs] = kmeans(windows(:, 1:end -4),round(size(windows, 1)*0.01),'Options',opts, 'start', OCs);
-fences = calculateFences(OIDXs,OCs,ODs);
-save('../data/OCs.mat', 'OIDXs','OCs','Osumds','ODs', 'fences', '-v7.3');
-trainSequences = generateTrainSequences(trainWindows(:, end-3:end), OIDXs, ODs, fences);
-save('../data/trainSequences.mat', 'trainSequences', '-v7.3');
-display('sequences has been created');
+% opts = statset('Display', 'iter');
+% [OIDXs,OCs,Osumds,ODs] = kmeans(windows(:, 1:end -4),round(size(windows, 1)*0.01),'Options',opts, 'start', OCs);
+% fences = calculateFences(OIDXs,OCs,ODs);
+% save('../data/OCs.mat', 'OIDXs','OCs','Osumds','ODs', 'fences', '-v7.3');
+% trainSequences = generateTrainSequences(trainWindows(:, end-3:end), OIDXs, ODs, fences);
+% save('../data/trainSequences.mat', 'trainSequences', '-v7.3');
+% display('sequences has been created');
 
 
 [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(trainSequences, size(OCs, 1)+2, 19, 6);

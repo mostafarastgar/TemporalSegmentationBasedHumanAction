@@ -28,26 +28,26 @@ confuseItems = {
 %     [1 81; 3 363; 5 125],
     
     [3 243; 5 365; 4 324; 2 82],
-    [3 363; 2 282; 1 161],
-    [5 85; 3 123; 4 164; 2 162; 5 325],
-
-    [1 121; 5 365; 4 84; 2 82; 5 45],
-    [5 165; 3 323; 6 366; 1 41; 2 82; 4 44],
-    [2 42; 3 83; 4 124; 5 165; 6 206; 1 241; 2 282; 3 323; 4 364],
-    [6 46; 2 82; 1 121; 6 146],
-    [5 45; 2 162; 1 121; 6 366],
-    [5 125; 6 46; 1 41; 2 162],
-    [1 81; 6 46; 3 163; 4 204],
-    [5 245; 1 81; 6 46],
-    [2 42; 3 83; 1 121; 4 244],
-    [3 83; 1 121; 2 82; 5 125; 6 366]
+%     [3 363; 2 282; 1 161],
+%     [5 85; 3 123; 4 164; 2 162; 5 325],
+% 
+%     [1 121; 5 365; 4 84; 2 82; 5 45],
+%     [5 165; 3 323; 6 366; 1 41; 2 82; 4 44],
+%     [2 42; 3 83; 4 124; 5 165; 6 206; 1 241; 2 282; 3 323; 4 364],
+%     [6 46; 2 82; 1 121; 6 146],
+%     [5 45; 2 162; 1 121; 6 366],
+%     [5 125; 6 46; 1 41; 2 162],
+%     [1 81; 6 46; 3 163; 4 204],
+%     [5 245; 1 81; 6 46],
+%     [2 42; 3 83; 1 121; 4 244],
+%     [3 83; 1 121; 2 82; 5 125; 6 366]
     };
 orgSegs = {};
 segs = {};
 accuracies = zeros(length(confuseItems), 1);
 for(i=1:length(confuseItems))
     [testSequence, originalSegments] = getObservations(features, confuseItems{i}, windowSize, GMModel, coeffGMM, pruneGMM, OCs, fences);
-    [ STATES, segments ] = testHMM(testSequence, ESTTR, ESTEMIT);
+    [ STATES, segments ] = testHMM(testSequence, ESTTR, ESTEMIT, windowSize);
     [originalSegments, segments, accuracy] = findAccuracy(originalSegments, segments, tolerance);
     orgSegs{i} = originalSegments;
     segs{i} = segments;

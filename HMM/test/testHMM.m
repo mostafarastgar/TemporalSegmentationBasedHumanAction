@@ -1,4 +1,4 @@
-function [ STATES, segments ] = testHMM( testSequence, ESTTR, ESTEMIT )
+function [ STATES, segments ] = testHMM( testSequence, ESTTR, ESTEMIT, windowSize )
 observations = transpose(testSequence(:, end));
 STATES = hmmviterbi(observations,ESTTR,ESTEMIT);
 initStates = [2:3:17];
@@ -20,9 +20,13 @@ for(i=2:size(STATES, 2))
         lastState = STATES(i);
     else
         if(STATES(i) ~= STATES(i - 1))
-            if(STATES(i) == STATES(i - 1) + 1)
+            if(STATES(i) ~= size(ESTEMIT, 1))
                 lastState=STATES(i);
             else
+                if(testSequence(i-1, 2) - currentMin > windowSize)
+                    segments = [segments; currentMin testSequence(i-1, 2) segIndex];
+                    segIndex = segIndex + 1;
+                end
                 lastState = 0;
                 currentMin = 0;
             end

@@ -23,7 +23,7 @@ for(i=2:size(STATES, 2))
             if(STATES(i) ~= size(ESTEMIT, 1))
                 lastState=STATES(i);
             else
-                if(testSequence(i-1, 2) - currentMin > windowSize)
+                if(testSequence(i-1, 2) - currentMin > windowSize(1))
                     segments = [segments; currentMin testSequence(i-1, 2) segIndex];
                     segIndex = segIndex + 1;
                 end

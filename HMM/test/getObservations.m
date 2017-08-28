@@ -17,9 +17,10 @@ for(i=1:size(classes_files))
 end
 subData = features(idxs, :);
 maxFramesNo = max(subData(:, end-1));
-for(j=1:ceil(lastFrameSize/windowSize))
-    minFrame=(j-1)*windowSize + 1;
-    maxFrame=j*windowSize;
+windowsCount = ceil((maxFramesNo-windowSize(1))/windowSize(2))+1;
+for(j=1:windowsCount)
+    minFrame=(j-1)*windowSize(2) + 1;
+    maxFrame=minFrame + windowSize(1)-1;
     if(maxFrame>maxFramesNo)
         maxFrame = maxFramesNo;
     end

@@ -6,7 +6,7 @@ finalStates = initStates + 2;
 segments = [];
 lastState = 0;
 segIndex = 1;
-currentMin = 0;
+currentMin = testSequence(1, 1);
 for(i=2:size(STATES, 2))
     if(sum(initStates(:) == STATES(i))>0)
         if(currentMin == 0)

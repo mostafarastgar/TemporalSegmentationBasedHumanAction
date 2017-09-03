@@ -18,46 +18,53 @@ end
 segments = tmp;
 tmpOrg = [];
 tmpIn = [];
-[~, idx] = sort(originalSegments(:, 3), 'descend');
-faults = 0;
+faults = ones(1, max(originalSegments(:, 2)));
 slabel = 1;
-for(i=1:size(idx, 1))
-    segment = originalSegments(idx(i), :);
-    index = findNearestSegment(segment, segments);
-    if(index > 0)
-        conflict = abs(segments(index, 1) - segment(1));
-        if(conflict<=tolerance)
-            conflict = 0;
-        end
-        faults = faults + conflict;
-        
-        conflict = abs(segments(index, 2) - segment(2));
-        if(conflict<=tolerance)
-            conflict = 0;
-        end
-        faults = faults + conflict;
-        tmpOrg = [tmpOrg; originalSegments(idx(i), :)];
-        tmpOrg(end, 4) = slabel;
-        tmpIn = [tmpIn; segments(index, :)];
-        tmpIn(end, 4) = slabel;
-        segments(index, :) = [];
-    else
-        conflict = segment(3);
-        if(conflict<=tolerance)
-            conflict = 0;
-        end
-        faults = faults + conflict;
-        tmpOrg = [tmpOrg; originalSegments(idx(i), :)];
-        tmpOrg(end, 4) = slabel;
+inters = zeros(size(originalSegments, 1), size(segments, 1));
+for(i=1:size(originalSegments, 1))
+    for(j=1:size(segments, 1))
+        inters(i, j) = getIntersection(originalSegments(i, :), segments(j, :));
     end
-    slabel = slabel +1;
+end
+[row, col] = findMaxRowCol(inters);
+while(inters(row, col) ~= 0)
+    orgSeg = originalSegments(row, :);
+    seg=segments(col, :);
+    startIndex = max(seg(1), orgSeg(1));
+    conflict = abs(seg(1) - orgSeg(1));
+    if(conflict<=tolerance)
+        startIndex = min(seg(1), orgSeg(1));
+    end
+    
+    endIndex = min(seg(2), orgSeg(2));
+    conflict = abs(seg(2) - orgSeg(2));
+    if(conflict<=tolerance)
+        endIndex = max(seg(2), orgSeg(2));
+    end
+    faults(startIndex:endIndex) = 0;
+    tmpOrg = [tmpOrg; orgSeg];
+    tmpOrg(end, 4) = slabel;
+    tmpIn = [tmpIn; seg];
+    tmpIn(end, 4) = slabel;
+    slabel = slabel + 1;
+    
+    inters(row, :) = [];
+    inters(:, col) = [];
+    originalSegments(row, :) = [];
+    segments(col, :) = [];
+    [row, col] = findMaxRowCol(inters);
+end
+for(i=1:size(originalSegments, 1))
+    tmpOrg = [tmpOrg; originalSegments(i, 1:end-1) slabel];
+    slabel = slabel + 1;
 end
 for(i=1:size(segments, 1))
-    tmpIn = [tmpIn; [segments(i, 1:3) slabel]];
-    slabel = slabel +1;
+    tmpIn = [tmpIn; segments(i, 1:end-1) slabel];
+    slabel = slabel + 1;
 end
-accuracy = 100*(originalSegments(end, 2) - faults)/originalSegments(end, 2);
 originalSegments = tmpOrg;
 segments = tmpIn;
+faults = sum(faults);
+accuracy = 100*(max(originalSegments(:, 2)) - faults)/max(originalSegments(:, 2));
 end
 

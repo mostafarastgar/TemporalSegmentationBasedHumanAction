@@ -7,11 +7,11 @@ addpath('BOW');
 addpath('HMM');
 addpath('HMM/train');
 
-% ExtractFeatures;
+ExtractFeatures;
 
-% normalize;
+normalize;
 
-% kmeansfeatures;
+kmeansfeatures;
 
 GMModel = GMM(features, C);
 

@@ -1,10 +1,12 @@
 % features = pcakmeansfeatures.mat
-function [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(trainSequences, O, Q, maxClassNo)
+function [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(trainSequences, O, maxClassNo)
+Q = 3*maxClassNo+1;
+finalInitStateIndex = (maxClassNo-1)*3+2;
 emisionmat = zeros(Q, O);
 maxVecotorsPerFile = 0;
 fileSize = 0;
 finalBeginningIndices = [];
-for(i=2:3:17)
+for(i=2:3:finalInitStateIndex)
     classNo = ceil((i-1)/3);
     beginningIndices = [];
     middleIndices = [];
@@ -48,25 +50,17 @@ for(j=1:size(uniqueValues, 1))
     emisionmat(1, uniqueValues(j)) = sum(finalBeginningIndices(:) == uniqueValues(j))/numberOfElement;
 end
 
-prior = [1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0 1/6 0 0];
-transmat = [0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;...
-    0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0;...
-    0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0;...
-    0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0,0;...
-    0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0,0,0;...
-    0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0;...
-    0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0,0;...
-    0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0,0,0;...
-    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0;...
-    0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0,0;...
-    0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0,0,0;...
-    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0,0.100000000000000,0,0;...
-    0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0,0;...
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0,0,0;...
-    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000,0.100000000000000,0,0;...
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000,0;...
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0.500000000000000,0.500000000000000;...
-    0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0,0.100000000000000,0,0.400000000000000];
+prior = zeros(1, 3*maxClassNo);
+prior(1, 1:3:end-2)= 1/maxClassNo;
+transmat = zeros(3*maxClassNo, 3*maxClassNo);
+transmat(3:3:end, 1:3:finalInitStateIndex-1) = 0.5/maxClassNo;
+for(i=1:3:finalInitStateIndex-1)
+    transmat(i, i) = 0.5;
+    transmat(i, i+1) = 0.5;
+    transmat(i+1, i+1) = 0.5;
+    transmat(i+1, i+2) = 0.5;
+    transmat(i+2, i+2) = 0.5;
+end
 transmat = [prior;transmat];
 transmat = [zeros(Q, 1) transmat];
 
@@ -85,12 +79,13 @@ end
 % [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 250);
 [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat);
 ESTTR(1, :) = transmat(1, :);
+ESTTR(4:3:end, :) = transmat(4:3:end, :);
 ESTEMIT(1, :) = emisionmat(1, :);
 
 ESTTR(:, :) = ESTTR(:, :)*0.5;
 ESTTR = [ESTTR zeros(Q, 1)+0.5];
 ESTTR = [ESTTR;zeros(1, Q+1)];
-ESTTR(end, 2:end-1) = 0.5/(Q-1);
+ESTTR(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
 ESTTR(end, end) = 0.5;
 transmat(:, :) = transmat(:, :)*0.5;
 transmat = [transmat ESTTR(1:end-1, end)];

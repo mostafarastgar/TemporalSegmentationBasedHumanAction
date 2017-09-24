@@ -13,7 +13,7 @@ for(pruneIndex=size(latent, 1):-1:2)
 end
 features = [scores(:, 1:pruneIndex) features(:, end-2:end)];
 clear scores;
-save('data/features/pcafeatures.mat', 'features', '-v7.3');
+save(strcat(matDirPrefix, 'features/pcafeatures.mat'), 'features', '-v7.3');
 toc;
 
 tic;
@@ -23,14 +23,15 @@ toc;
 
 tic;
 features = [features IDX];
-save('data/features/pcakmeansfeatures.mat', 'features', '-v7.3');
-save('data/features/pcakmeansparams.mat', 'C', 'coeff', 'IDX', 'latent', 'opts', 'sumd', '-v7.3');
+save(strcat(matDirPrefix, 'features/pcakmeansfeatures.mat'), 'features', '-v7.3');
+save(strcat(matDirPrefix, 'features/pcakmeansparams.mat'), 'C', 'coeff', 'IDX', 'latent', 'opts', 'sumd', '-v7.3');
+percent=140000/size(features, 1);
 for(i=1:4000)
     indices = find(features(:, end) == i);
     dists = [D(indices, i) indices];
     dists = sortrows(dists, 1);
-    features(dists(round(end*0.073):end, 2),:) = [];
+    features(dists(round(end*percent):end, 2),:) = [];
     disp(num2str(i));
 end
-save('data/features/prunedfeatures.mat', 'features', '-v7.3');
+save(strcat(matDirPrefix, 'features/prunedfeatures.mat'), 'features', '-v7.3');
 toc;

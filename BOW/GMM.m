@@ -1,5 +1,5 @@
-function [ GMModel ] = GMM( features, C)
-data = features(:, 1:end -4);
+function [ GMModel ] = GMM( features, C, matDirPrefix)
+data = features(:, 1:end-4);
 sizeOfData = size(data, 1);
 sizeOfFields = size(data, 2);
 covMat = zeros(sizeOfFields, sizeOfFields, 4000);
@@ -27,5 +27,5 @@ display('start fitgmdist');
 
 tic;
 GMModel = fitgmdist(features(:, 1:end-4), 4000, 'CovType', 'full', 'Regularize', 1e-5, 'Options',statset('Display','iter','MaxIter',1500), 'Start',start);
-save('data/features/GMModel.mat', 'GMModel', '-v7.3');
+save(strcat(matDirPrefix, 'features/GMModel.mat'), 'GMModel', '-v7.3');
 toc;

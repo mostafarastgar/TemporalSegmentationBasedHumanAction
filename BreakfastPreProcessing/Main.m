@@ -4,4 +4,5 @@ addpath('../Descriptor/hog3d');
 addpath('../Descriptor/HOOF');
 % ExtractLabels;
 % CreateClips;
-ExtractFeatures;
+% ExtractFeatures;
+IntegrateFeatures;

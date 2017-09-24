@@ -2,11 +2,12 @@ labels = load('../data/break fast/labels.mat');
 labels = labels.labels;
 features = zeros(300000, 771);
 index = 1;
-for(i=2:size(labels, 1))
+firstJ = 2;
+for(i=3:size(labels, 1))
     dir_perfix = strcat('../data/break fast/clips/', num2str(i), '-', labels{i}, '/');
     videos=dir(strcat(dir_perfix,'*.avi'));
     file_names = {videos.name};
-    for(j=1:size(file_names,2))
+    for(j=firstJ:size(file_names,2))
         tic;
         file_name=strcat(dir_perfix,file_names{j});
         mov = VideoReader(file_name);
@@ -27,7 +28,7 @@ for(i=2:size(labels, 1))
         if(index+size(stips, 1)-1>300000)
             features(index:end, :) = [];
             save(strcat('../data/break fast/features/features_',num2str(i), '_', num2str(j),'.mat'), 'features', '-v7.3');
-            features = zeros(300000, 1555);
+            features = zeros(300000, 771);
             index = 1;
         end
         features(index:index+size(stips, 1)-1, :) = [HOG3DFeatures HOOFFeatures classLabel fileId stips(:, 3)];
@@ -35,6 +36,7 @@ for(i=2:size(labels, 1))
         disp([num2str(i), '-', labels{i}, ' file ', num2str(j), 'has been completed']);
         toc;
     end
+    firstJ = 1;
 end
 features(index:end, :) = [];
 save('../data/break fast/features/features.mat', 'features', '-v7.3');

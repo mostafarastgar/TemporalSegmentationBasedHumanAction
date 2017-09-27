@@ -17,7 +17,7 @@ save(strcat(matDirPrefix, 'features/pcafeatures.mat'), 'features', '-v7.3');
 toc;
 
 tic;
-opts = statset('MaxIter',10);
+opts = statset('MaxIter',20);
 [IDX,C,sumd,D] = kmeans(features(:, 1:end -3),4000,'Options',opts);
 toc;
 
@@ -30,7 +30,9 @@ for(i=1:4000)
     indices = find(features(:, end) == i);
     dists = [D(indices, i) indices];
     dists = sortrows(dists, 1);
-    features(dists(round(end*percent):end, 2),:) = [];
+    if(round(size(dists, 1)*percent)>1)
+        features(dists(round(size(dists, 1)*percent):end, 2),:) = [];
+    end
     disp(num2str(i));
 end
 save(strcat(matDirPrefix, 'features/prunedfeatures.mat'), 'features', '-v7.3');

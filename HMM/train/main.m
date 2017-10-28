@@ -1,40 +1,33 @@
-% features = load('../../data/features/pcakmeansfeatures.mat');
+% for KTH is 'data/', for break fast is 'data/break fast/'
+matDirPrefix='../../data/break fast/';
+
+% just for kth
+% features = load('../../data/break fast/features/pcakmeansfeatures.mat');
 % features = features.features;
-% GMModel = load('../../data/features/GMModel.mat');
-% GMModel = GMModel.GMModel;
-% pca2ParamsGMM = load('../../data/features/pca2Params.mat');
-% coeff2 = pca2ParamsGMM.coeff2;
-% pruneIndex2 = pca2ParamsGMM.pruneIndex2;
-% 
-% windowSize = [10 10];
+
+GMModel = load(strcat(matDirPrefix, 'features/GMModel.mat'));
+GMModel = GMModel.GMModel;
+normalizationParams = load(strcat(matDirPrefix, 'features/normalizationParams.mat'));
+minhog = normalizationParams.minhog;
+maxhog = normalizationParams.maxhog;
+minhoof = normalizationParams.minhoof;
+maxhoof = normalizationParams.maxhoof;
+pcaParams = load(strcat(matDirPrefix, 'features/pcakmeansparams.mat'));
+coeff = pcaParams.coeff;
+pruneIndex = pcaParams.pruneIndex;
+pca2ParamsGMM = load(strcat(matDirPrefix, 'features/pca2Params.mat'));
+coeff2 = pca2ParamsGMM.coeff2;
+pruneIndex2 = pca2ParamsGMM.pruneIndex2;
+correctSegments = load(strcat(matDirPrefix, 'correctSegments.mat'));
+correctSegments = correctSegments.correctSegments;
+labels = load(strcat(matDirPrefix, 'labels.mat'));
+labels = labels.labels;
+windowSize = [10 10];
 % windows = break2Windows(features, 6, windowSize, GMModel, coeff2, pruneIndex2);
-% testWindowsIndices = [];
-% for(i=1:6)
-%     for(j=i:40:400)
-%         test = find(any(windows(:, end -3)==i, 2) & any(windows(:, end -2)==j, 2));
-%         if(size(test, 1)>0)
-%             testWindowsIndices = [testWindowsIndices; test];
-%         else
-%             break;
-%         end
-%     end
-% end
-% testWindows = windows(testWindowsIndices, :);
-% windows(testWindowsIndices, :) = [];
-% trainWindows = windows;
-% save('../data/windows.mat', 'testWindows', 'trainWindows', '-v7.3');
-% display('windows has been created');
-% 
-% windows = [trainWindows; testWindows];
-% opts = statset('Display', 'iter', 'MaxIter', 200);
-% [OIDXs,OCs,Osumds,ODs] = kmeans(windows(:, 1:end -4),round(size(windows, 1)*0.01),'Options',opts);
-% fences = calculateFences(OIDXs,OCs,ODs);
-% save('../data/OCs.mat', 'OIDXs','OCs','Osumds','ODs', 'fences', '-v7.3');
-% trainSequences = generateTrainSequences(trainWindows(:, end-3:end), OIDXs, ODs, fences);
-% save('../data/trainSequences.mat', 'trainSequences', '-v7.3');
-% display('sequences has been created');
+windows = break2WindowsFeaturePath(strcat(matDirPrefix, 'features/detail/'), windowSize, GMModel, minhog, maxhog, minhoof, maxhoof, coeff, pruneIndex, coeff2, pruneIndex2);
+% for KTH is 'data/', for break fast is 'data/break fast/'
+matDirPrefix='../data/break fast/';
+% save(strcat(matDirPrefix, 'windows.mat'), 'windows', '-v7.3');
 
-
-[ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(trainSequences, size(OCs, 1)+2, 6);
-save('../data/HMMData.mat', 'sequences', 'transmat', 'emisionmat', 'ESTTR', 'ESTEMIT', '-v7.3');
-display('HMM has been trained');
+k=10;
+results = KFoldObservation(k, windows, labels, correctSegments, matDirPrefix);

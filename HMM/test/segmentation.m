@@ -1,63 +1,103 @@
-HMMData = load('../data/HMMData.mat');
-ESTTR = HMMData.transmat;
-ESTEMIT = HMMData.emisionmat;
-
-GMModel = load('../../data/features/GMModel.mat');
+addpath('../../STIPDetector/selective-stip/method 1/demo');
+addpath('../../STIPDetector/selective-stip/method 1/src');
+addpath('../../Descriptor/hog3d');
+addpath('../../Descriptor/HOOF');
+addpath('../../Utils');
+% % for KTH is 'data/', for break fast is 'data/break fast/'
+matDirPrefix='../../data/break fast/';
+correctSegments = load(strcat(matDirPrefix,'correctSegments.mat'));
+correctSegments = correctSegments.correctSegments;
+GMModel = load(strcat(matDirPrefix,'features/GMModel.mat'));
 GMModel = GMModel.GMModel;
+normalizationParams = load(strcat(matDirPrefix,'features/normalizationParams.mat'));
+minhog = normalizationParams.minhog;
+maxhog = normalizationParams.maxhog;
+minhoof = normalizationParams.minhoof;
+maxhoof = normalizationParams.maxhoof;
+pcakmeansparams=load(strcat(matDirPrefix, 'features/pcakmeansparams.mat'));
+coeff = pcakmeansparams.coeff;
+pruneIndex = pcakmeansparams.pruneIndex;
+pcakmeans2=load(strcat(matDirPrefix, 'features/pca2Params.mat'));
+coeff2 = pcakmeans2.coeff2;
+pruneIndex2 = pcakmeans2.pruneIndex2;
 
-OCs = load('../data/OCs.mat');
-fences = OCs.fences;
-OCs = OCs.OCs;
-
-features = load('../../data/features/pcakmeansfeatures.mat');
-features = features.features;
-pca2ParamsGMM = load('../../data/features/pca2Params.mat');
-coeffGMM = pca2ParamsGMM.coeff2;
-pruneGMM = pca2ParamsGMM.pruneIndex2;
+% % for KTH is 'data/', for break fast is 'data/break fast/'
+matDirPrefix='../data/break fast/';
+HMMData = load(strcat(matDirPrefix,'HMMData.mat'));
+HMMData = HMMData.results;
 
 windowSize = [10 10];
 tolerance = 5;
-tic;
-confuseItems = {
-%     [1 161; 4 364; 2 42; 1 241],
-%     [1 1; 4 44; 5 85; 2 42],
-%     [5 245; 1 161; 2 82; 3 123; 4 164; 5 245; 6 326],
-%     [3 83; 5 45; 1 121],
-%     [4 124; 2 82; 3 363; 2 42; 1 161],
-%     [1 81; 3 363; 5 125],
-%     [5 245; 1 81; 6 46],
-% 
-    [1 81; 2 42; 3 163; 5 85; 4 284; 1 321],
-
-    [3 243; 5 365; 4 324; 2 82],
-    [5 85; 3 123; 4 164; 2 162; 5 325],
-    [1 121; 5 365; 4 84; 2 82; 5 45],
-    [5 165; 3 323; 6 366; 1 41; 2 82; 4 44],
-    [2 42; 3 83; 4 124; 5 165; 6 206; 1 241; 2 282; 3 323; 4 364],
-    [6 46; 2 82; 1 121; 6 146],
-    [5 45; 2 162; 1 121; 6 366],
-    [1 81; 6 46; 3 163; 4 204],
-    [2 42; 3 83; 1 121; 4 244],
-    [3 83; 1 121; 2 82; 5 125; 6 366]
-    [3 363; 2 282; 1 161],
-    [5 125; 6 46; 1 41; 2 162],
-    };
-orgSegs = {};
-segs = {};
-accuracies = zeros(length(confuseItems), 1);
-for(i=1:length(confuseItems))
-    [testSequence, originalSegments] = getObservations(features, confuseItems{i}, windowSize, GMModel, coeffGMM, pruneGMM, OCs, fences);
-    [ STATES, segments ] = testHMM(testSequence, ESTTR, ESTEMIT, windowSize);
-    [originalSegments, segments, accuracy] = findAccuracy(originalSegments, segments, tolerance);
-    orgSegs{i} = originalSegments;
-    segs{i} = segments;
-    accuracies(i) = accuracy;
-    disp(i);
+result = {};
+for(i=1:size(HMMData, 1))
+    teIdx = HMMData{i, 1};
+    fences = HMMData{i, 3};
+    ESTTR = HMMData{i, 9};
+    ESTEMIT = HMMData{i, 10};
+    OCs = HMMData{i, 5};
+    orgSegs = {};
+    segs = {};
+    accuracies = zeros(size(teIdx, 1), 1);
+    for(j=1:size(teIdx, 1))
+        originalSegments = correctSegments{teIdx(j), 3};
+        mov = VideoReader(correctSegments{teIdx(j), 1});
+        nFrames=mov.NumberOfFrames;
+        M=mov.Height;
+        N=mov.Width;
+        video=zeros(M,N,nFrames,'uint8');
+        try
+            for k= 1 : nFrames
+                im= read(mov,k);
+                im=im(:,:,1);
+                video(:,:,k)=im;
+            end
+        catch exception
+            nFrames = k-1;
+        end
+        stips = demo_selective_stip(0, video);
+        features = [(HOG3DAPI(video, stips, power(8/8, 3)*8*64, 8)-minhog)/(maxhog-minhog) (HOOFAPI(video, stips, 32, 8)-minhoof)/(maxhoof-minhoof)];
+        features = features * coeff;
+        features = features(:, 1:pruneIndex);
+        features(isnan(features)) = 0;
+        testSequence = [];
+        for(k=1:windowSize(2):nFrames)
+            eIdx = k + windowSize(1) - 1;
+            if(eIdx>nFrames)
+                eIdx = nFrames;
+            end
+            cube = features(find(any(stips(:, 3)>=k, 2) & any(stips(:, 3)<=eIdx, 2)), :);
+            p = posterior(GMModel, cube);
+            vector = sum(p, 1);
+            if(sum(vector) ~= 0)
+                vector = vector * coeff2;
+                vector = vector(:, 1:pruneIndex2);
+                
+                [IDX,D]=knnsearch(OCs, vector);
+                if(D>fences(IDX, 2))
+                    IDX = size(OCs, 1) + 2;
+                else
+                    if(D>fences(IDX, 1))
+                        IDX = size(OCs, 1) + 1;
+                    end
+                end
+                testSequence = [testSequence; k eIdx IDX];
+            end
+        end
+        [ STATES, segments ] = testHMM(testSequence, ESTTR, ESTEMIT, windowSize);
+        [originalSegments, segments, accuracy] = findAccuracy(originalSegments, segments, tolerance);
+        orgSegs{j} = originalSegments;
+        segs{j} = segments;
+        accuracies(i) = accuracy;
+        display(strcat('segment ', num2str(j), 'in iteration ', num2str(i), ' has been done.'));
+    end
+    result{i, 1} = {originalSegments, segments, accuracies};
+    result{i, 2} = mean(accuracies);
+    display(strcat('********end of iteration ', num2str(i), '********'));
 end
-accuracy = mean(accuracies);
-toc;
-[~, idx] = max(accuracies);
+[~, idx] = max(result{:, 2});
 subplot(2, 1, 1);
-plot(accuracies);
+plot(result{:, 2});
+best = result{idx, 1};
+[~, idx] = max(best{3});
 subplot(2, 1, 2);
-displaySegments(orgSegs{idx}, segs{idx});
+displaySegments(best{3}{1}, best{3}{2});

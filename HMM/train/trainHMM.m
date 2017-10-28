@@ -6,12 +6,13 @@ emisionmat = zeros(Q, O);
 maxVecotorsPerFile = 0;
 fileSize = 0;
 finalBeginningIndices = [];
+maxFileIndex = max(trainSequences(:, 2));
 for(i=2:3:finalInitStateIndex)
     classNo = ceil((i-1)/3);
     beginningIndices = [];
     middleIndices = [];
     endIndices = [];
-    for(j=1:400)
+    for(j=1:maxFileIndex)
         indices = trainSequences(any(trainSequences(:, 1)==classNo, 2) & any(trainSequences(:, 2)==j, 2), 5);
         sizeOfIndices = size(indices, 1);
         if(sizeOfIndices>0)
@@ -77,22 +78,29 @@ for(classNo=1:maxClassNo)
     end
 end
 % [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 250);
-[ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat);
-ESTTR(1, :) = transmat(1, :);
-ESTTR(4:3:end, :) = transmat(4:3:end, :);
-ESTEMIT(1, :) = emisionmat(1, :);
+% [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat);
+% ESTTR(1, :) = transmat(1, :);
+% ESTTR(4:3:end, :) = transmat(4:3:end, :);
+% ESTEMIT(1, :) = emisionmat(1, :);
 
-ESTTR(:, :) = ESTTR(:, :)*0.5;
-ESTTR = [ESTTR zeros(Q, 1)+0.5];
-ESTTR = [ESTTR;zeros(1, Q+1)];
-ESTTR(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
-ESTTR(end, end) = 0.5;
+% ESTTR(:, :) = ESTTR(:, :)*0.5;
+% ESTTR = [ESTTR zeros(Q, 1)+0.5];
+% ESTTR = [ESTTR;zeros(1, Q+1)];
+% ESTTR(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
+% ESTTR(end, end) = 0.5;
 transmat(:, :) = transmat(:, :)*0.5;
-transmat = [transmat ESTTR(1:end-1, end)];
-transmat = [transmat; ESTTR(end, :)];
+transmat = [transmat zeros(Q, 1)+0.5];
+transmat = [transmat;zeros(1, Q+1)];
+transmat(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
+transmat(end, end) = 0.5;
 
-ESTEMIT = [ESTEMIT; zeros(1, O)];
-ESTEMIT(end, end-1) = 0.2;
-ESTEMIT(end, end) = 0.8;
-emisionmat = [emisionmat; ESTEMIT(end, :)];
+% ESTEMIT = [ESTEMIT; zeros(1, O)];
+% ESTEMIT(end, end-1) = 0.2;
+% ESTEMIT(end, end) = 0.8;
+emisionmat = [emisionmat; zeros(1, O)];
+emisionmat(end, end-1) = 0.2;
+emisionmat(end, end) = 0.8;
+
+ESTTR=transmat;
+ESTEMIT=emisionmat;
 end

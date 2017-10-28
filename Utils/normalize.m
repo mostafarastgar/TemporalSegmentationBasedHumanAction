@@ -10,3 +10,4 @@ maxhoof = max(max(features(:, 513:768)));
 features(:, 513:768) = (features(:, 513:768)-minhoof)/(maxhoof - minhoof);
 toc;
 save(strcat(matDirPrefix, 'features/normalizedFeatures.mat'), 'features', '-v7.3');
+save(strcat(matDirPrefix, 'features/normalizationParams.mat'), 'minhog', 'maxhog', 'minhoof',  'maxhoof', '-v7.3');

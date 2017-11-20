@@ -1,8 +1,9 @@
 % features = pcakmeansfeatures.mat
-function [ videoVectors ] = break2WindowsFeaturePath( featurePath,windowSize, GMModel, minhog, maxhog, minhoof, maxhoof, coeff, pruneIndex, coeff2, pruneIndex2)
+function [ windows, shifts ] = break2WindowsFeaturePath( featurePath,windowSize, GMModel, minhog, maxhog, minhoof, maxhoof, coeff, pruneIndex, coeff2, pruneIndex2)
 videos=dir(strcat(featurePath,'*.mat'));
 file_names = {videos.name};
-videoVectors = [];
+windows = [];
+shifts = [];
 for(i=1:size(file_names, 2))
     file_name=strcat(featurePath,file_names{i});
     features = load(file_name);
@@ -16,11 +17,17 @@ for(i=1:size(file_names, 2))
         end
         subData = features(ia(j):ej, :);
         maxFramesNo = max(subData(:, end));
-        windowsCount = ceil((maxFramesNo-windowSize(1))/windowSize(2))+1;
+        if(maxFramesNo>=windowSize(1)*8)
+            shift = round(maxFramesNo/windowSize(1));
+        else
+            shift = round(maxFramesNo/8);
+        end
+        shifts = [shifts; shift];
+        windowsCount = ceil((maxFramesNo-shift)/shift)+1;
         tic;
         for(k=1:windowsCount)
-            minFrame=(k-1)*windowSize(2) + 1;
-            maxFrame=minFrame + windowSize(1)-1;
+            minFrame=(k-1)*shift + 1;
+            maxFrame=minFrame + shift-1;
             if(maxFrame>maxFramesNo)
                 maxFrame = maxFramesNo;
             end
@@ -35,12 +42,13 @@ for(i=1:size(file_names, 2))
             if(sum(vector) ~= 0)
                 vector = vector * coeff2;
                 vector = vector(:, 1:pruneIndex2);
-                videoVectors = [videoVectors; vector c(j, 1) c(j, 2) minFrame maxFrame];
+                windows = [windows; vector c(j, 1) c(j, 2) minFrame maxFrame];
             end
         end
         toc;
         display(strcat(['upto index ', num2str(j), ' of ', num2str(size(ia, 1)),' has been done.']));
     end
+    save('../data/break fast/windows.mat', 'windows', 'shifts', '-v7.3');
     display(strcat(['***file ', num2str(i), ' has been done***']));
 end
 end

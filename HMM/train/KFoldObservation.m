@@ -40,7 +40,7 @@ for(i=1:CV0.NumTestSets)
     end
     disp(['>>>>>>starting kmeans on iteration', num2str(i), ' windows count is ', num2str(size(trainWindows, 1)), ' ', num2str(size(trIdx, 1))]);
     tic;
-    [OIDXs,OCs,Osumds,ODs] = kmeans(trainWindows(:, 1:end -4),round(size(trainWindows, 1)*0.01),'Options',opts);
+    [OIDXs,OCs,Osumds,ODs] = kmeans(trainWindows(:, 1:end -4),300,'Options',opts);
     toc;
     disp(['>>>>>>starting calculating fences on iteration', num2str(i)]);
     tic;

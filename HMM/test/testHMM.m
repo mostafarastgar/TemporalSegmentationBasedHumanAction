@@ -1,7 +1,7 @@
 function [ STATES, segments ] = testHMM( testSequence, ESTTR, ESTEMIT, windowSize )
 observations = transpose(testSequence(:, end));
 STATES = hmmviterbi(observations,ESTTR,ESTEMIT);
-initStates = [2:3:17];
+initStates = [2:3:size(ESTTR, 1)-3];
 finalStates = initStates + 2;
 segments = [];
 lastState = 0;

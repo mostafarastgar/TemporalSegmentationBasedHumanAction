@@ -25,9 +25,11 @@ pruneIndex2 = pcakmeans2.pruneIndex2;
 matDirPrefix='../data/break fast/';
 HMMData = load(strcat(matDirPrefix,'HMMData.mat'));
 HMMData = HMMData.results;
-
-windowSize = [10 10];
-tolerance = 5;
+windows = load(strcat(matDirPrefix,'windows.mat'));
+shifts = windows.shifts;
+windowSize = round(mean(shifts));
+tolerance = round(windowSize/2);
+windowSize = [windowSize windowSize];
 result = {};
 for(i=1:size(HMMData, 1))
     teIdx = HMMData{i, 1};
@@ -73,11 +75,13 @@ for(i=1:size(HMMData, 1))
                 vector = vector(:, 1:pruneIndex2);
                 
                 [IDX,D]=knnsearch(OCs, vector);
-                if(D>fences(IDX, 2))
-                    IDX = size(OCs, 1) + 2;
+                if(D>fences(IDX, 1)&&D<=fences(IDX, 2))
+                    % Do nothing
                 else
-                    if(D>fences(IDX, 1))
+                    if(D>fences(IDX, 3)&&D<=fences(IDX, 4))
                         IDX = size(OCs, 1) + 1;
+                    else
+                        IDX = size(OCs, 1) + 2;
                     end
                 end
                 testSequence = [testSequence; k eIdx IDX];
@@ -87,7 +91,7 @@ for(i=1:size(HMMData, 1))
         [originalSegments, segments, accuracy] = findAccuracy(originalSegments, segments, tolerance);
         orgSegs{j} = originalSegments;
         segs{j} = segments;
-        accuracies(i) = accuracy;
+        accuracies(j) = accuracy;
         display(strcat('segment ', num2str(j), 'in iteration ', num2str(i), ' has been done.'));
     end
     result{i, 1} = {originalSegments, segments, accuracies};

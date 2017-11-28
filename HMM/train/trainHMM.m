@@ -77,30 +77,30 @@ for(classNo=1:maxClassNo)
         end
     end
 end
-% [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 250);
+[ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 10);
 % [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat);
 % ESTTR(1, :) = transmat(1, :);
 % ESTTR(4:3:end, :) = transmat(4:3:end, :);
 % ESTEMIT(1, :) = emisionmat(1, :);
 
-% ESTTR(:, :) = ESTTR(:, :)*0.5;
-% ESTTR = [ESTTR zeros(Q, 1)+0.5];
-% ESTTR = [ESTTR;zeros(1, Q+1)];
-% ESTTR(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
-% ESTTR(end, end) = 0.5;
+ESTTR(:, :) = ESTTR(:, :)*0.5;
+ESTTR = [ESTTR zeros(Q, 1)+0.5];
+ESTTR = [ESTTR;zeros(1, Q+1)];
+ESTTR(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
+ESTTR(end, end) = 0.5;
 transmat(:, :) = transmat(:, :)*0.5;
 transmat = [transmat zeros(Q, 1)+0.5];
 transmat = [transmat;zeros(1, Q+1)];
 transmat(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
 transmat(end, end) = 0.5;
 
-% ESTEMIT = [ESTEMIT; zeros(1, O)];
-% ESTEMIT(end, end-1) = 0.2;
-% ESTEMIT(end, end) = 0.8;
+ESTEMIT = [ESTEMIT; zeros(1, O)];
+ESTEMIT(end, end-1) = 0.2;
+ESTEMIT(end, end) = 0.8;
 emisionmat = [emisionmat; zeros(1, O)];
 emisionmat(end, end-1) = 0.2;
 emisionmat(end, end) = 0.8;
 
-ESTTR=transmat;
-ESTEMIT=emisionmat;
+% ESTTR=transmat;
+% ESTEMIT=emisionmat;
 end

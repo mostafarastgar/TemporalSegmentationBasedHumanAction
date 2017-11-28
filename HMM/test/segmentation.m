@@ -23,7 +23,7 @@ pruneIndex2 = pcakmeans2.pruneIndex2;
 
 % % for KTH is 'data/', for break fast is 'data/break fast/'
 matDirPrefix='../data/break fast/';
-HMMData = load(strcat(matDirPrefix,'HMMData.mat'));
+HMMData = load(strcat(matDirPrefix,'HMMData-mini.mat'));
 HMMData = HMMData.results;
 windows = load(strcat(matDirPrefix,'windows.mat'));
 shifts = windows.shifts;
@@ -31,7 +31,7 @@ windowSize = round(mean(shifts));
 tolerance = round(windowSize/2);
 windowSize = [windowSize windowSize];
 result = {};
-for(i=1:size(HMMData, 1))
+for(i=2:size(HMMData, 1))
     teIdx = HMMData{i, 1};
     fences = HMMData{i, 3};
     ESTTR = HMMData{i, 9};
@@ -40,7 +40,12 @@ for(i=1:size(HMMData, 1))
     orgSegs = {};
     segs = {};
     accuracies = zeros(size(teIdx, 1), 1);
-    for(j=1:size(teIdx, 1))
+    if(i==2)
+        startj=4;
+    else
+        startj=1;
+    end
+    for(j=startj:size(teIdx, 1))
         originalSegments = correctSegments{teIdx(j), 3};
         mov = VideoReader(correctSegments{teIdx(j), 1});
         nFrames=mov.NumberOfFrames;
@@ -92,7 +97,7 @@ for(i=1:size(HMMData, 1))
         orgSegs{j} = originalSegments;
         segs{j} = segments;
         accuracies(j) = accuracy;
-        display(strcat('segment ', num2str(j), 'in iteration ', num2str(i), ' has been done.'));
+        display(strcat('segment ', num2str(j), ' in iteration ', num2str(i), ' has been done. accuracy is ', num2str(accuracy), ' mean accuracy: ', num2str(mean(accuracies(1:j)))));
     end
     result{i, 1} = {originalSegments, segments, accuracies};
     result{i, 2} = mean(accuracies);

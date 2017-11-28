@@ -31,7 +31,7 @@ windowSize = round(mean(shifts));
 tolerance = round(windowSize/2);
 windowSize = [windowSize windowSize];
 result = {};
-for(i=2:size(HMMData, 1))
+for(i=1:size(HMMData, 1))
     teIdx = HMMData{i, 1};
     fences = HMMData{i, 3};
     ESTTR = HMMData{i, 9};
@@ -40,8 +40,8 @@ for(i=2:size(HMMData, 1))
     orgSegs = {};
     segs = {};
     accuracies = zeros(size(teIdx, 1), 1);
-    if(i==2)
-        startj=4;
+    if(i==1)
+        startj=1;
     else
         startj=1;
     end

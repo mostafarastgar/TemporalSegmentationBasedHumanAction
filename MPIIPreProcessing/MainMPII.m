@@ -1,0 +1,11 @@
+addpath('../STIPDetector/selective-stip/method 1/demo');
+addpath('../STIPDetector/selective-stip/method 1/src');
+addpath('../Descriptor/hog3d');
+addpath('../Descriptor/HOOF');
+addpath('../Utils');
+% fid = fopen('../data/MPII/detectionGroundtruth-1-0.csv','rt');
+% metaData = textscan(fid, '%d %s %d %d %d %s', 'Delimiter',','); 
+% fclose(fid);
+% save('../data/MPII/metaData.mat', 'metaData', '-v7.3');
+% CreateClips;
+ExtractFeatures;

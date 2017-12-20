@@ -5,12 +5,20 @@ for(i=1:size(labels, 1))
 end
 for(i=1:size(segments, 1))
     for(j=1:size(segments{i, 3}, 1))
-        save(strcat(matDirPrefix, 'clips/', num2str(segments{i, 3}(j, 3)),...
-            '/', num2str(segments{i, 2}(1)), '_', num2str(segments{i, 2}(2)),...
-            '_', num2str(segments{i, 2}(3)), '_', num2str(j), '.mat'), 'test', '-v7.3');
+        if(size(segments{i, 2}, 1) ~= 0)
+            save(strcat(matDirPrefix, 'clips/', num2str(segments{i, 3}(j, 3)),...
+                '/', num2str(segments{i, 2}(1)), '_', num2str(segments{i, 2}(2)),...
+                '_', num2str(segments{i, 2}(3)), '_', num2str(j), '.mat'), 'test', '-v7.3');
+            mode = 1;
+        else
+            save(strcat(matDirPrefix, 'clips/', num2str(segments{i, 3}(j, 3)),...
+                '/', segments{i, 1}, '_', num2str(segments{i, 3}(j, 1)),...
+                '_', num2str(segments{i, 3}(j, 2)), '.mat'), 'test', '-v7.3');
+            mode = 2;
+        end
     end
 end
-opts = statset('Display', 'iter', 'MaxIter', 1500);
+opts = statset('Display', 'iter', 'MaxIter', 150);
 results = {};
 randData = randi([0, 1], size(segments, 1), 1);
 CV0=cvpartition(randData, 'k', k);
@@ -25,12 +33,23 @@ for(i=1:CV0.NumTestSets)
                 '/*.mat'));
             files = {files.name};
             found = 0;
-            for(file_index=1:size(files, 2))
-                if(strcmp(files{file_index}, strcat(num2str(segments{j, 2}(1)),...
-                        '_', num2str(segments{j, 2}(2)), '_',...
-                        num2str(segments{j, 2}(3)), '_', num2str(k), '.mat')))
-                    found = 1;
-                    break;
+            if(mode == 1)
+                for(file_index=1:size(files, 2))
+                    if(strcmp(files{file_index}, strcat(num2str(segments{j, 2}(1)),...
+                            '_', num2str(segments{j, 2}(2)), '_',...
+                            num2str(segments{j, 2}(3)), '_', num2str(k), '.mat')))
+                        found = 1;
+                        break;
+                    end
+                end
+            else
+                for(file_index=1:size(files, 2))
+                    if(strcmp(files{file_index}, strcat(num2str(segments{j, 1}),...
+                            '_', num2str(segments{j, 3}(1)), '_',...
+                            num2str(segments{j, 3}(2)), '.mat')))
+                        found = 1;
+                        break;
+                    end
                 end
             end
             if(found == 1)
@@ -62,8 +81,9 @@ for(i=1:CV0.NumTestSets)
     disp(['>>>>>>starting hmm train on iteration ', num2str(i)]);
     tic;
     results{i, 2}(:, 1) = results{i, 2}(:, 1) - 1;
-    
-    [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(results{i, 2}, size(results{i, 5}, 1)+2, size(labels, 1)-1);
+    trainWindows = windows;
+    trainWindows(:, end - 3) = trainWindows(:, end - 3) - 1;
+    [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(results{i, 2}, trainWindows, size(results{i, 5}, 1)+2, size(labels, 1)-1);
     toc;
     results{i, 8} = sequences;
     results{i, 9} = transmat;

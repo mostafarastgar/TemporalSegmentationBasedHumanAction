@@ -1,12 +1,11 @@
 % features = pcakmeansfeatures.mat
-function [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(trainSequences, O, maxClassNo)
+function [ sequences, transmat, emisionmat, ESTTR, ESTEMIT ] = trainHMM(trainSequences, trainWindows, O, maxClassNo)
 Q = 3*maxClassNo+1;
 finalInitStateIndex = (maxClassNo-1)*3+2;
 emisionmat = zeros(Q, O);
-maxVecotorsPerFile = 0;
-fileSize = 0;
 finalBeginningIndices = [];
 maxFileIndex = max(trainSequences(:, 2));
+opts = statset('Display', 'iter', 'MaxIter', 1500);
 for(i=2:3:finalInitStateIndex)
     classNo = ceil((i-1)/3);
     beginningIndices = [];
@@ -16,14 +15,28 @@ for(i=2:3:finalInitStateIndex)
         indices = trainSequences(any(trainSequences(:, 1)==classNo, 2) & any(trainSequences(:, 2)==j, 2), 5);
         sizeOfIndices = size(indices, 1);
         if(sizeOfIndices>0)
-            miniSize = round(sizeOfIndices/4);
-            beginningIndices = [beginningIndices;indices(1:miniSize)];
-            middleIndices = [middleIndices;indices(miniSize+1:end-miniSize)];
-            endIndices = [endIndices;indices(end-miniSize+1:end)];
-            if(sizeOfIndices>maxVecotorsPerFile)
-                maxVecotorsPerFile = sizeOfIndices;
+            init_end=1;
+            end_first=sizeOfIndices;
+            if(sizeOfIndices>3)
+                windows = trainWindows(any(trainWindows(:, end-3)==classNo, 2) & any(trainWindows(:, end-2)==j, 2), :);
+                IDX = kmeans(windows(:, 1:end-4), 3, 'Options', opts);
+                for(k=2:sizeOfIndices)
+                    if(IDX(k-1) ~= IDX(k))
+                        init_end = k-1;
+                        break;
+                    end
+                end
+                for(k=sizeOfIndices:-1:2)
+                    if(IDX(k-1) ~= IDX(k))
+                        end_first=k;
+                        break;
+                    end
+                end
             end
-            fileSize = fileSize + 1;
+            beginningIndices = [beginningIndices;indices(1:init_end)];
+            middleIndices = [middleIndices;indices(init_end+1:end_first-1)];
+            endIndices = [endIndices;indices(end_first:end)];
+            disp(['i: ', num2str(i), ' j: ', num2str(j)]);
         end
     end
     finalBeginningIndices = [finalBeginningIndices; beginningIndices];
@@ -77,30 +90,30 @@ for(classNo=1:maxClassNo)
         end
     end
 end
-[ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 10);
+% [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 10);
 % [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat);
 % ESTTR(1, :) = transmat(1, :);
 % ESTTR(4:3:end, :) = transmat(4:3:end, :);
 % ESTEMIT(1, :) = emisionmat(1, :);
 
-ESTTR(:, :) = ESTTR(:, :)*0.5;
-ESTTR = [ESTTR zeros(Q, 1)+0.5];
-ESTTR = [ESTTR;zeros(1, Q+1)];
-ESTTR(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
-ESTTR(end, end) = 0.5;
+% ESTTR(:, :) = ESTTR(:, :)*0.5;
+% ESTTR = [ESTTR zeros(Q, 1)+0.5];
+% ESTTR = [ESTTR;zeros(1, Q+1)];
+% ESTTR(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
+% ESTTR(end, end) = 0.5;
 transmat(:, :) = transmat(:, :)*0.5;
 transmat = [transmat zeros(Q, 1)+0.5];
 transmat = [transmat;zeros(1, Q+1)];
 transmat(end, 2:3:finalInitStateIndex) = 0.5/maxClassNo;
 transmat(end, end) = 0.5;
 
-ESTEMIT = [ESTEMIT; zeros(1, O)];
-ESTEMIT(end, end-1) = 0.2;
-ESTEMIT(end, end) = 0.8;
+% ESTEMIT = [ESTEMIT; zeros(1, O)];
+% ESTEMIT(end, end-1) = 0.2;
+% ESTEMIT(end, end) = 0.8;
 emisionmat = [emisionmat; zeros(1, O)];
 emisionmat(end, end-1) = 0.2;
 emisionmat(end, end) = 0.8;
 
-% ESTTR=transmat;
-% ESTEMIT=emisionmat;
+ESTTR=transmat;
+ESTEMIT=emisionmat;
 end

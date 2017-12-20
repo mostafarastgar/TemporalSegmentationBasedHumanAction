@@ -99,7 +99,7 @@ for(i=1:size(HMMData, 1))
         accuracies(j) = accuracy;
         display(strcat('segment ', num2str(j), ' in iteration ', num2str(i), ' has been done. accuracy is ', num2str(accuracy), ' mean accuracy: ', num2str(mean(accuracies(1:j)))));
     end
-    result{i, 1} = {originalSegments, segments, accuracies};
+    result{i, 1} = {orgSegs, segs, accuracies};
     result{i, 2} = mean(accuracies);
     display(strcat('********end of iteration ', num2str(i), '********'));
 end

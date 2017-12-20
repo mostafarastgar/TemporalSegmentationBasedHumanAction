@@ -1,5 +1,5 @@
 % features = pcakmeansfeatures.mat
-function [ windows, shifts ] = break2WindowsFeaturePath( featurePath,windowSize, GMModel, minhog, maxhog, minhoof, maxhoof, coeff, pruneIndex, coeff2, pruneIndex2)
+function [ windows, shifts ] = break2WindowsFeaturePath(windowSize, GMModel, minhog, maxhog, minhoof, maxhoof, coeff, pruneIndex, coeff2, pruneIndex2)
 videos=dir(strcat(featurePath,'*.mat'));
 file_names = {videos.name};
 windows = [];
@@ -48,7 +48,6 @@ for(i=1:size(file_names, 2))
         toc;
         display(strcat(['upto index ', num2str(j), ' of ', num2str(size(ia, 1)),' has been done.']));
     end
-    save('../data/break fast/windows.mat', 'windows', 'shifts', '-v7.3');
     display(strcat(['***file ', num2str(i), ' has been done***']));
 end
 end

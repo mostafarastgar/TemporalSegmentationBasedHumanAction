@@ -1,11 +1,15 @@
-function [ row, col] = findMaxRowCol( inputMat)
-mat = reshape(transpose(inputMat), 1, []);
-j = size(inputMat, 2);
-[~, idx] = max(mat);
-row = ceil(idx/j);
-col = mod(idx, j);
-if(col == 0)
-    col = j;
+function [ row, col] = findMaxRowCol(inputMat)
+if(size(inputMat, 1)==0 || size(inputMat, 2)==0)
+    row = 0;
+    col = 0;
+else
+    maxes = zeros(size(inputMat, 1), 2);
+    for(row=1:size(inputMat, 1))
+        [amount, idx] = max(inputMat(row, :));
+        maxes(row, :) = [amount, idx];
+    end
+    [~, row] = max(maxes(:, 1));
+    col = maxes(row, 2);
 end
 end
 

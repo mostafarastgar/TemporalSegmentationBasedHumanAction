@@ -10,11 +10,11 @@ addpath('HMM');
 addpath('HMM/train');
 
 % for KTH, call this
-ExtractFeatures;
+% ExtractFeatures;
 % for break fast, call this
 % MainBreakfast;
 % for MPII call this
-% MainMPII;
+MainMPII;
 
 % for KTH is 'data/', for break fast is 'data/break fast/', for MPII is 'data/MPII/'
 matDirPrefix='data/MPII/';
@@ -27,4 +27,4 @@ kmeansfeatures;
 
 GMModel = GMM(features, C, matDirPrefix);
 
-% videoVectors;
+videoVectors;

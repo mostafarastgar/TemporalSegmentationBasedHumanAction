@@ -18,6 +18,11 @@ pruneIndex = pcaParams.pruneIndex;
 pca2ParamsGMM = load(strcat(matDirPrefix, 'features/pca2Params.mat'));
 coeff2 = pca2ParamsGMM.coeff2;
 pruneIndex2 = pca2ParamsGMM.pruneIndex2;
+arvData = load(strcat(matDirPrefix, 'features/arvData.mat'));
+arvData = arvData.arvData;
+labels = arvData(:, end-1:end);
+arvData = arvData(:, 1:end-2) * coeff2;
+arvData = [arvData(:, 1:pruneIndex2) labels];
 correctSegments = load(strcat(matDirPrefix, 'correctSegments.mat'));
 correctSegments = correctSegments.correctSegments;
 labels = load(strcat(matDirPrefix, 'labels.mat'));
@@ -33,3 +38,6 @@ matDirPrefix='../data/MPII/';
 
 k=10;
 results = KFoldObservation(k, windows, labels, correctSegments, matDirPrefix);
+
+SVMStructs = trainClassifier(arvData);
+save(strcat(matDirPrefix, 'SVMStructs.mat'), 'SVMStructs', '-v7.3');

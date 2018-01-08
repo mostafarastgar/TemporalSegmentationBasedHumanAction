@@ -3,8 +3,10 @@ addpath('../../STIPDetector/selective-stip/method 1/src');
 addpath('../../Descriptor/hog3d');
 addpath('../../Descriptor/HOOF');
 addpath('../../Utils');
-% % for KTH is 'data/', for break fast is 'data/break fast/'
-matDirPrefix='../../data/break fast/';
+% % for KTH is 'data/', for break fast is 'data/break fast/', for MPII is 'data/MPII/'
+matDirPrefix='../../data/MPII/';
+colors = load('../../data/colors.mat');
+colors = colors.colors;
 correctSegments = load(strcat(matDirPrefix,'correctSegments.mat'));
 correctSegments = correctSegments.correctSegments;
 GMModel = load(strcat(matDirPrefix,'features/GMModel.mat'));
@@ -21,9 +23,9 @@ pcakmeans2=load(strcat(matDirPrefix, 'features/pca2Params.mat'));
 coeff2 = pcakmeans2.coeff2;
 pruneIndex2 = pcakmeans2.pruneIndex2;
 
-% % for KTH is 'data/', for break fast is 'data/break fast/'
-matDirPrefix='../data/break fast/';
-HMMData = load(strcat(matDirPrefix,'HMMData-mini.mat'));
+% % for KTH is 'data/', for break fast is 'data/break fast/', for MPII is 'data/MPII/'
+matDirPrefix='../data/MPII/';
+HMMData = load(strcat(matDirPrefix,'HMMData.mat'));
 HMMData = HMMData.results;
 windows = load(strcat(matDirPrefix,'windows.mat'));
 shifts = windows.shifts;
@@ -47,15 +49,25 @@ for(i=1:size(HMMData, 1))
     end
     for(j=startj:size(teIdx, 1))
         originalSegments = correctSegments{teIdx(j), 3};
-        mov = VideoReader(correctSegments{teIdx(j), 1});
+%         for KTH and Break Fast
+%         mov = VideoReader(correctSegments{teIdx(j), 1});
+%         for MPII 
+        mov = VideoReader(strcat('../../data/MPII/videos/', correctSegments{teIdx(j), 1}, '.avi'));
         nFrames=mov.NumberOfFrames;
         M=mov.Height;
         N=mov.Width;
-        video=zeros(M,N,nFrames,'uint8');
+%         for KTH and Break Fast
+%         video=zeros(M,N,nFrames,'uint8');
+%         for MPII
+        video=zeros(ceil(M/5),ceil(N/5),nFrames,'uint8');
         try
             for k= 1 : nFrames
                 im= read(mov,k);
-                im=im(:,:,1);
+%               for KTH and Break Fast
+%               im=im(:,:,1);
+%               video(:,:,k)=im;
+%               for MPII
+                im=im(1:5:end,1:5:end,1);
                 video(:,:,k)=im;
             end
         catch exception
@@ -98,6 +110,7 @@ for(i=1:size(HMMData, 1))
         segs{j} = segments;
         accuracies(j) = accuracy;
         display(strcat('segment ', num2str(j), ' in iteration ', num2str(i), ' has been done. accuracy is ', num2str(accuracy), ' mean accuracy: ', num2str(mean(accuracies(1:j)))));
+        displaySegments(originalSegments, segments, colors);
     end
     result{i, 1} = {orgSegs, segs, accuracies};
     result{i, 2} = mean(accuracies);
@@ -109,4 +122,4 @@ plot(result{:, 2});
 best = result{idx, 1};
 [~, idx] = max(best{3});
 subplot(2, 1, 2);
-displaySegments(best{3}{1}, best{3}{2});
+displaySegments(best{3}{1}, best{3}{2}, colors);

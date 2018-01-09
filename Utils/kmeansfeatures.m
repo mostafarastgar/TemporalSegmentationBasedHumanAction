@@ -4,6 +4,7 @@ features(isnan(features)) = 0;
 toc;
 
 tic;
+meanColumns = mean(features(:, 1:end -3));
 [coeff,scores,latent] = princomp(features(:, 1:end -3));
 latent =100* (latent(1) - latent);
 for(pruneIndex=size(latent, 1):-1:2)
@@ -24,7 +25,7 @@ toc;
 tic;
 features = [features IDX];
 save(strcat(matDirPrefix, 'features/pcakmeansfeatures.mat'), 'features', '-v7.3');
-save(strcat(matDirPrefix, 'features/pcakmeansparams.mat'), 'C', 'coeff', 'IDX', 'latent', 'pruneIndex', 'opts', 'sumd', '-v7.3');
+save(strcat(matDirPrefix, 'features/pcakmeansparams.mat'), 'C', 'coeff', 'IDX', 'latent', 'pruneIndex', 'meanColumns', 'opts', 'sumd', '-v7.3');
 percent=140000/size(features, 1);
 for(i=1:4000)
     indices = find(features(:, end) == i);

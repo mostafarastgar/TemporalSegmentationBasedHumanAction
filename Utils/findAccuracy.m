@@ -1,4 +1,4 @@
-function [ originalSegments, segments, accuracy, confusionMat, meanClass, correct ] = findAccuracy( originalSegments, segments, tolerance, SVMStructs, confusionMat, features, GMModel, coeff2, pruneIndex2, labels)
+function [ originalSegments, segments, accuracy, confusionMat, meanClass, correct ] = findAccuracy( originalSegments, segments, tolerance, SVMStructs, confusionMat, features, GMModel, coeff2, pruneIndex2, meanColumns2, labels)
 originalSegments = sortrows(originalSegments, 1);
 segments = sortrows(segments, 1);
 
@@ -89,6 +89,7 @@ for(i=1:size(segments, 1))
     vector = sum(p, 1);
     class = 0;
     if(sum(vector) ~= 0)
+        vector = bsxfun(@minus, vector, meanColumns2);
         vector = vector * coeff2;
         vector = vector(:, 1:pruneIndex2);
         class = findClass(vector, SVMStructs);

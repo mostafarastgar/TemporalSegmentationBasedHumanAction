@@ -15,6 +15,7 @@ for(i=1 : size(file_names,2))
             fileFeatures = classFeatures(classFeatures(:, end-1)==files(fileIdx), :);
             fileFeatures(:, 1:512) = (fileFeatures(:, 1:512) - minhog)/(maxhog-minhog);
             fileFeatures(:, 513:768) = (fileFeatures(:, 513:768) - minhoof)/(maxhoof-minhoof);
+            fileFeatures = [bsxfun(@minus, fileFeatures(:, 1:end -3), meanColumns) fileFeatures(:, end-2:end)];
             fileFeatures = fileFeatures(:, 1:end-3) * coeff;
             fileFeatures = fileFeatures(:, 1:pruneIndex);
             fileFeatures(isnan(fileFeatures)) = 0;
@@ -26,7 +27,8 @@ for(i=1 : size(file_names,2))
     toc;
 end
 save(strcat(matDirPrefix, 'features/arvData.mat'), 'arvData', '-v7.3');
-[coeff2,scores2,latent2] = princomp(arvData(:, 1:end -2));
+meanColumns2 = mean(arvData(:, 1:end-2));
+[coeff2,scores2,latent2] = princomp(arvData(:, 1:end-2));
 latent2 =100*(latent2(1) - latent2);
 for(pruneIndex2=size(latent2, 1):-1:2)
     if(floor(latent2(pruneIndex2)) ~= floor(latent2(pruneIndex2-1)))
@@ -34,4 +36,4 @@ for(pruneIndex2=size(latent2, 1):-1:2)
     end
 end
 scores2 = [scores2(:, 1:pruneIndex2) arvData(:, end-1:end)];
-save(strcat(matDirPrefix, 'features/pca2Params.mat'), 'coeff2', 'latent2', 'scores2', 'pruneIndex2', '-v7.3');
+save(strcat(matDirPrefix, 'features/pca2Params.mat'), 'coeff2', 'latent2', 'scores2', 'pruneIndex2', 'meanColumns2', '-v7.3');

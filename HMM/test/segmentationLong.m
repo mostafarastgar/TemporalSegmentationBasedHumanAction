@@ -21,9 +21,11 @@ maxhoof = normalizationParams.maxhoof;
 pcakmeansparams=load(strcat(matDirPrefix, 'features/pcakmeansparams.mat'));
 coeff = pcakmeansparams.coeff;
 pruneIndex = pcakmeansparams.pruneIndex;
+meanColumns = pcakmeansparams.meanColumns;
 pcakmeans2=load(strcat(matDirPrefix, 'features/pca2Params.mat'));
 coeff2 = pcakmeans2.coeff2;
 pruneIndex2 = pcakmeans2.pruneIndex2;
+meanColumns2 = pcakmeans2.meanColumns2;
 
 % % for KTH is 'data/', for break fast is 'data/break fast/', for MPII is 'data/MPII/'
 matDirPrefix='../data/MPII/';
@@ -32,7 +34,10 @@ HMMData = HMMData.results;
 SVMStructs = load(strcat(matDirPrefix,'SVMStructs.mat'));
 SVMStructs = SVMStructs.SVMStructs;
 windows = load(strcat(matDirPrefix,'windows.mat'));
-windowSize = [30 30];
+shifts = windows.shifts;
+windows = windows.windows;
+shift = round(mean(shifts));
+windowSize = [shift shift];
 tolerance = round(windowSize(2)/2);
 result = {};
 for(i=1:size(HMMData, 1))
@@ -75,6 +80,7 @@ for(i=1:size(HMMData, 1))
             end
             stips = demo_selective_stip(0, video);
             features = [(HOG3DAPI(video, stips, power(8/8, 3)*8*64, 8)-minhog)/(maxhog-minhog) (HOOFAPI(video, stips, 32, 8)-minhoof)/(maxhoof-minhoof)];
+            features = bsxfun(@minus, features, meanColumns);
             features = features * coeff;
             features = features(:, 1:pruneIndex);
             features(isnan(features)) = 0;
@@ -87,6 +93,7 @@ for(i=1:size(HMMData, 1))
                 p = posterior(GMModel, cube);
                 vector = sum(p, 1);
                 if(sum(vector) ~= 0)
+                    vector = bsxfun(@minus, vector, meanColumns2);
                     vector = vector * coeff2;
                     vector = vector(:, 1:pruneIndex2);
                     
@@ -106,7 +113,7 @@ for(i=1:size(HMMData, 1))
             try
                 [ STATES, segments ] = testHMM(testSequence, ESTTR, ESTEMIT, windowSize);
                 features = [features stips(:, 3)];
-                [partSegments, segments, accuracy, confusionMat, meanClass, correct] = findAccuracy(partSegments, segments, tolerance, SVMStructs, confusionMat, features, GMModel, coeff2, pruneIndex2, labels);
+                [partSegments, segments, accuracy, confusionMat, meanClass, correct] = findAccuracy(partSegments, segments, tolerance, SVMStructs, confusionMat, features, GMModel, coeff2, pruneIndex2, meanColumns2, labels);
                 orgSegs{end+1} = partSegments;
                 segs{end+1} = segments;
                 accuracies = [accuracies;accuracy];

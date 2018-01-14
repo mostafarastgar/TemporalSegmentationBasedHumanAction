@@ -34,13 +34,13 @@ windowSize = [100 100];
 % windows = break2Windows(features, 6, windowSize, GMModel, coeff2, pruneIndex2);
 featurePath = strcat(matDirPrefix, 'features/detail/');
 
-[windows, shifts] = break2WindowsFeaturePath(featurePath, windowSize, GMModel, minhog, maxhog, minhoof, maxhoof, coeff, pruneIndex, meanColumns, coeff2, pruneIndex2, meanColumns2);
+% [windows, shifts] = break2WindowsFeaturePath(featurePath, windowSize, GMModel, minhog, maxhog, minhoof, maxhoof, coeff, pruneIndex, meanColumns, coeff2, pruneIndex2, meanColumns2);
 % for KTH is 'data/', for break fast is 'data/break fast/', for break fast is 'data/MPII/'
 matDirPrefix='../data/MPII/';
-save(strcat(matDirPrefix, 'windows.mat'), 'windows', 'shifts', '-v7.3');
+% save(strcat(matDirPrefix, 'windows.mat'), 'windows', 'shifts', '-v7.3');
 
-% k=10;
-% results = KFoldObservation(k, windows, labels, correctSegments, matDirPrefix);
-% 
-% SVMStructs = trainClassifier(arvData);
-% save(strcat(matDirPrefix, 'SVMStructs.mat'), 'SVMStructs', '-v7.3');
+k=10;
+results = KFoldObservation(k, windows, labels, correctSegments, matDirPrefix);
+
+SVMStructs = trainClassifier(arvData);
+save(strcat(matDirPrefix, 'SVMStructs.mat'), 'SVMStructs', '-v7.3');

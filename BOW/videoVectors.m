@@ -15,10 +15,10 @@ for(i=1 : size(file_names,2))
             fileFeatures = classFeatures(classFeatures(:, end-1)==files(fileIdx), :);
             fileFeatures(:, 1:512) = (fileFeatures(:, 1:512) - minhog)/(maxhog-minhog);
             fileFeatures(:, 513:768) = (fileFeatures(:, 513:768) - minhoof)/(maxhoof-minhoof);
+            fileFeatures(isnan(fileFeatures)) = 0;
             fileFeatures = [bsxfun(@minus, fileFeatures(:, 1:end -3), meanColumns) fileFeatures(:, end-2:end)];
             fileFeatures = fileFeatures(:, 1:end-3) * coeff;
             fileFeatures = fileFeatures(:, 1:pruneIndex);
-            fileFeatures(isnan(fileFeatures)) = 0;
             P = posterior(GMModel, fileFeatures);
             arvData = [arvData; sum(P, 1) classes(classIdx) files(fileIdx)];
             disp(strcat('features:', num2str(i),' of ', num2str(size(file_names,2)) ,' calss:', num2str(classIdx), ' of ', num2str(size(classes, 1)),' file:', num2str(fileIdx), ' of ', num2str(size(files, 1)),' has been done.'));

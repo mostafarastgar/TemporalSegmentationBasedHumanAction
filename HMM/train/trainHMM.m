@@ -114,6 +114,7 @@ emisionmat = [emisionmat; zeros(1, O)];
 emisionmat(end, end-1) = 0.2;
 emisionmat(end, end) = 0.8;
 
-ESTTR=transmat;
-ESTEMIT=emisionmat;
+% [ESTTR, ESTEMIT] = hmmtrain(sequences, transmat, emisionmat, 'Maxiterations', 10);
+ESTTR = transmat;
+ESTEMIT = emisionmat;
 end

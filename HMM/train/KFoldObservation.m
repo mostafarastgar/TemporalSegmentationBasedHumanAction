@@ -18,7 +18,7 @@ for(i=1:size(segments, 1))
         end
     end
 end
-opts = statset('Display', 'iter', 'MaxIter', 150);
+opts = statset('Display', 'iter', 'MaxIter', 100);
 results = {};
 randData = randi([0, 1], size(segments, 1), 1);
 CV0=cvpartition(randData, 'k', k);

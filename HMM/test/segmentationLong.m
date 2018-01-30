@@ -80,10 +80,10 @@ for(i=1:size(HMMData, 1))
             end
             stips = demo_selective_stip(0, video);
             features = [(HOG3DAPI(video, stips, power(8/8, 3)*8*64, 8)-minhog)/(maxhog-minhog) (HOOFAPI(video, stips, 32, 8)-minhoof)/(maxhoof-minhoof)];
+            features(isnan(features)) = 0;
             features = bsxfun(@minus, features, meanColumns);
             features = features * coeff;
             features = features(:, 1:pruneIndex);
-            features(isnan(features)) = 0;
             for(k=1:windowSize(2):nFrames)
                 eIdx = k + windowSize(1) - 1;
                 if(eIdx>nFrames)

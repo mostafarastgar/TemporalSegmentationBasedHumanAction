@@ -19,14 +19,11 @@ for(i=1:size(file_names, 2))
             fileFeatures(:, 1:512) = (fileFeatures(:, 1:512) - minhog)/(maxhog-minhog);
             fileFeatures(:, 513:768) = (fileFeatures(:, 513:768) - minhoof)/(maxhoof-minhoof);
             labels = fileFeatures(:, end-2:end);
+            fileFeatures(isnan(fileFeatures)) = 0;
             fileFeatures = [bsxfun(@minus, fileFeatures(:, 1:end-3), meanColumns) fileFeatures(:, end-2:end)];
             fileFeatures = fileFeatures(:, 1:end-3) * coeff;
             fileFeatures = fileFeatures(:, 1:pruneIndex);
-            fileFeatures(isnan(fileFeatures)) = 0;
             fileFeatures = posterior(GMModel, fileFeatures);
-            fileFeatures = bsxfun(@minus, fileFeatures, meanColumns2);
-            fileFeatures = fileFeatures * coeff2;
-            fileFeatures = fileFeatures(:, 1:pruneIndex2);
             fileFeatures = [fileFeatures labels];
             maxFramesNo = max(fileFeatures(:, end));
             if(maxFramesNo>=windowSize(1)*8)
@@ -45,6 +42,9 @@ for(i=1:size(file_names, 2))
                 cube = fileFeatures(any(fileFeatures(:, end)>=minFrame, 2) & any(fileFeatures(:, end)<=maxFrame, 2), :);
                 vector = sum(cube(:, 1:end-3), 1);
                 if(sum(vector) ~= 0)
+                    vector = bsxfun(@minus, vector, meanColumns2);
+                    vector = vector * coeff2;
+                    vector = vector(:, 1:pruneIndex2);
                     windows = [windows; vector classes(classIdx) files(fileIdx) minFrame maxFrame];
                 end
             end
